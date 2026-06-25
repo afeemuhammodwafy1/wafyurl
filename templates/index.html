@@ -4,71 +4,303 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WafyURL | Premium URL Shortener</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg: #050608;
+            --card-bg: #101217;
+            --neon-blue: #00d2ff;
+            --neon-glow: rgba(0, 210, 255, 0.4);
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: var(--neon-blue);
+            filter: blur(150px);
+            opacity: 0.15;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .logo {
+            font-size: clamp(2.5rem, 8vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -2px;
+        }
+
+        .logo span {
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-glow);
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 2.5rem;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: clamp(1.5rem, 5vw, 2.5rem);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+        }
+
+        /* Input Group Responsive Layout */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 480px) {
+            .input-group {
+                flex-direction: row;
+            }
+        }
+
+        input[type="url"], input[type="text"] {
+            flex: 1;
+            background: #000000;
+            border: 2px solid #1e293b;
+            padding: 14px 18px;
+            border-radius: 14px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        .btn {
+            background: var(--neon-blue);
+            color: #000;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--neon-glow);
+        }
+
+        /* Results Section */
+        .result-area {
+            margin-top: 2rem;
+            display: none; /* Hidden until URL is generated */
+            animation: fadeIn 0.5s ease;
+        }
+
+        .url-box {
+            display: flex;
+            background: #000;
+            border-radius: 14px;
+            padding: 8px;
+            border: 1px dashed var(--neon-blue);
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .url-box input {
+            border: none !important;
+            background: transparent;
+            box-shadow: none !important;
+        }
+
+        .copy-btn {
+            background: rgba(0, 210, 255, 0.1);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* QR Code Styling */
+        #qrcode {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        /* Stats Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        .stat-val {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--neon-blue);
+        }
+
+        footer {
+            margin-top: 3rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-msg { color: #ff4757; font-size: 0.9rem; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <div class="background-glow"></div>
-    
-    <main class="container">
+
+    <div class="main-wrapper">
         <header>
             <h1 class="logo">wafy<span>url</span></h1>
-            <p class="subtitle">Fast, Secure, and Minimalist Links.</p>
+            <p class="subtitle">Shorten links with neon precision.</p>
         </header>
 
         {% if stats %}
-        <!-- Stats View -->
-        <section class="card stats-card animate-in">
-            <h2>Link Analytics</h2>
+        <!-- Analytics View -->
+        <div class="card">
+            <h3>Link Analytics</h3>
             <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="label">Total Clicks</span>
-                    <span class="value neon-text">{{ stats.clicks }}</span>
+                <div class="stat-box">
+                    <span class="stat-val">{{ stats.clicks }}</span>
+                    <small>Total Clicks</small>
                 </div>
-                <div class="stat-item">
-                    <span class="label">Short Code</span>
-                    <span class="value">{{ stats.short_code }}</span>
+                <div class="stat-box">
+                    <span class="stat-val">{{ stats.short_code }}</span>
+                    <small>Short Code</small>
                 </div>
             </div>
-            <p class="original-link-text">Points to: <a href="{{ stats.original_url }}">{{ stats.original_url }}</a></p>
-            <a href="/" class="btn btn-secondary">Create New Link</a>
-        </section>
+            <p style="margin-top:1.5rem; font-size: 0.9rem; color: var(--text-dim);">
+                Original: <a href="{{ stats.original_url }}" style="color: var(--neon-blue); text-decoration: none;">{{ stats.original_url[:30] }}...</a>
+            </p>
+            <br>
+            <a href="/" class="btn" style="display:inline-block; text-decoration:none;">Create New Link</a>
+        </div>
         {% else %}
-        <!-- Shortener Input View -->
-        <section class="card main-card">
+        <!-- Shortener Form -->
+        <div class="card">
             <div class="input-group">
-                <input type="url" id="longUrl" placeholder="Paste your long URL here (https://...)" required>
-                <button id="shortenBtn" class="btn btn-primary">Shorten</button>
+                <input type="url" id="longUrl" placeholder="Enter link here (e.g. google.com)" autocomplete="off">
+                <button id="shortenBtn" class="btn">Shorten</button>
             </div>
-            <p id="errorMessage" class="error-msg"></p>
-        </section>
+            <p id="error" class="error-msg"></p>
 
-        <!-- Result View (Hidden by default) -->
-        <section id="resultSection" class="card result-card hidden">
-            <div class="result-content">
-                <div class="url-output">
-                    <input type="text" id="shortenedUrl" readonly>
-                    <button id="copyBtn" class="btn-icon">
-                        <span id="copyIcon">Copy</span>
-                    </button>
+            <div id="result" class="result-area">
+                <div class="url-box">
+                    <input type="text" id="shortUrlInput" readonly>
+                    <button id="copyBtn" class="copy-btn">Copy</button>
                 </div>
-                
-                <div class="qr-container">
-                    <div id="qrcode"></div>
-                    <p>Scan to visit</p>
-                </div>
+                <div id="qrcode"></div>
+                <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 10px;">
+                    💡 Pro Tip: Add <b>+</b> to the end of your link to see stats!
+                </p>
             </div>
-            <p class="hint">Add <strong>+</strong> to your link to track clicks!</p>
-        </section>
+        </div>
         {% endif %}
-    </main>
 
-    <footer>
-        <p>&copy; 2024 WafyURL. Designed for Performance.</p>
-    </footer>
+        <footer>
+            &copy; 2026 - Afee Muhammod Wafy
+        </footer>
+    </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body>
-</html>
+    <script>
+        const shortenBtn = document.getElementById('shortenBtn');
+        const longUrl = document.getElementById('longUrl');
+        const resultArea = document.getElementById('result');
+        const shortUrlInput = document.getElementById('shortUrlInput');
+        const errorMsg = document.getElementById('error');
+        const qrDiv = document.getElementById('qrcode');
+
+        if(shortenBtn) {
+            shortenBtn.addEventListener('click', async () => {
+                const urlValue = longUrl.value.trim();
+                errorMsg.innerText = "";
+
+                if(!urlValue) {
+                    errorMsg.innerText = "Please enter a URL first.";
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/shorten', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ url: urlValue })
+                    });
+                    const data = await response.json();
+
+                    if(response.ok) {
+                        shortUrlInput.value = data.short_url;
+                        resultArea.style.display = 'block';
+                        
+                        // Generate QR
+                        qrDiv.innerHTML = "";
+                        new QRCode(qrDiv, {
+                            text: data.short_url,
+                            width: 120,
+                            height: 120,
+                            colorDark : "#000000",
+                            colorLight : "#ffffff"
+                        });
+                    } else {
+                        errorMsg.innerText = data.error;
+                    }
