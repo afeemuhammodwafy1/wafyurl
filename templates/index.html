@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WafyURL | Premium URL Shortener</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <main class="container">
+        <header>
+            <h1 class="logo">wafy<span>url</span></h1>
+            <p class="subtitle">Fast, Secure, and Minimalist Links.</p>
+        </header>
+
+        {% if stats %}
+        <!-- Stats View -->
+        <section class="card stats-card animate-in">
+            <h2>Link Analytics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="label">Total Clicks</span>
+                    <span class="value neon-text">{{ stats.clicks }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Short Code</span>
+                    <span class="value">{{ stats.short_code }}</span>
+                </div>
+            </div>
+            <p class="original-link-text">Points to: <a href="{{ stats.original_url }}">{{ stats.original_url }}</a></p>
+            <a href="/" class="btn btn-secondary">Create New Link</a>
+        </section>
+        {% else %}
+        <!-- Shortener Input View -->
+        <section class="card main-card">
+            <div class="input-group">
+                <input type="url" id="longUrl" placeholder="Paste your long URL here (https://...)" required>
+                <button id="shortenBtn" class="btn btn-primary">Shorten</button>
+            </div>
+            <p id="errorMessage" class="error-msg"></p>
+        </section>
+
+        <!-- Result View (Hidden by default) -->
+        <section id="resultSection" class="card result-card hidden">
+            <div class="result-content">
+                <div class="url-output">
+                    <input type="text" id="shortenedUrl" readonly>
+                    <button id="copyBtn" class="btn-icon">
+                        <span id="copyIcon">Copy</span>
+                    </button>
+                </div>
+                
+                <div class="qr-container">
+                    <div id="qrcode"></div>
+                    <p>Scan to visit</p>
+                </div>
+            </div>
+            <p class="hint">Add <strong>+</strong> to your link to track clicks!</p>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 WafyURL. Designed for Performance.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
