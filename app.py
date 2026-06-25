@@ -6,12 +6,12 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Database Configuration
 # Using SQLite for simplicity; Render supports this but data clears on redeploy 
 # unless using a persistent disk or external DB like PostgreSQL.
-app.config['SQLALCHEMY_DATABASE_DATABASE_URI'] = 'sqlite:///urls.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Database Model
