@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WafyURL | Premium URL Shortener</title>
+    <title>WafyURL | Modern URL Shortener</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -28,29 +28,12 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
         }
 
-        /* Ambient background glow */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 300px;
-            height: 300px;
-            background: var(--neon-blue);
-            filter: blur(150px);
-            opacity: 0.15;
-            z-index: -1;
-            transform: translate(-50%, -50%);
-        }
-
-        .main-wrapper {
+        .container {
             width: 100%;
             max-width: 550px;
             text-align: center;
-            z-index: 1;
         }
 
         .logo {
@@ -80,7 +63,7 @@
             width: 100%;
         }
 
-        /* Input Group Responsive Layout */
+        /* Responsive Form */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -88,21 +71,19 @@
         }
 
         @media (min-width: 480px) {
-            .input-group {
-                flex-direction: row;
-            }
+            .input-group { flex-direction: row; }
         }
 
         input[type="url"], input[type="text"] {
             flex: 1;
-            background: #000000;
+            background: #000;
             border: 2px solid #1e293b;
             padding: 14px 18px;
             border-radius: 14px;
             color: white;
             font-size: 1rem;
-            transition: all 0.3s ease;
             width: 100%;
+            transition: 0.3s;
         }
 
         input:focus {
@@ -119,8 +100,7 @@
             border-radius: 14px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
+            transition: 0.3s;
         }
 
         .btn:hover {
@@ -128,11 +108,10 @@
             box-shadow: 0 8px 20px var(--neon-glow);
         }
 
-        /* Results Section */
+        /* Results Area */
         .result-area {
             margin-top: 2rem;
-            display: none; /* Hidden until URL is generated */
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.5s ease forwards;
         }
 
         .url-box {
@@ -143,12 +122,13 @@
             border: 1px dashed var(--neon-blue);
             margin-bottom: 1.5rem;
             align-items: center;
+            gap: 10px;
         }
 
         .url-box input {
             border: none !important;
-            background: transparent;
-            box-shadow: none !important;
+            background: transparent !important;
+            padding: 10px;
         }
 
         .copy-btn {
@@ -162,16 +142,15 @@
             cursor: pointer;
         }
 
-        /* QR Code Styling */
         #qrcode {
             background: white;
             padding: 12px;
             border-radius: 12px;
             display: inline-block;
-            margin-bottom: 10px;
+            margin-top: 10px;
         }
 
-        /* Stats Styles */
+        /* Stats Section */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -192,31 +171,30 @@
             color: var(--neon-blue);
         }
 
-        footer {
-            margin-top: 3rem;
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            text-align: center;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .error-msg { color: #ff4757; font-size: 0.9rem; margin-top: 10px; }
+        footer {
+            margin-top: 3rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .error { color: #ff4757; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
+    <div class="container">
         <header>
             <h1 class="logo">wafy<span>url</span></h1>
             <p class="subtitle">Shorten links with neon precision.</p>
         </header>
 
         {% if stats %}
-        <!-- Analytics View -->
+        <!-- STATS VIEW -->
         <div class="card">
             <h3>Link Analytics</h3>
             <div class="stats-grid">
@@ -226,34 +204,38 @@
                 </div>
                 <div class="stat-box">
                     <span class="stat-val">{{ stats.short_code }}</span>
-                    <small>Short Code</small>
+                    <small>Code</small>
                 </div>
             </div>
-            <p style="margin-top:1.5rem; font-size: 0.9rem; color: var(--text-dim);">
-                Original: <a href="{{ stats.original_url }}" style="color: var(--neon-blue); text-decoration: none;">{{ stats.original_url[:30] }}...</a>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 10px; word-break: break-all;">
+                Original: {{ stats.original_url }}
             </p>
-            <br>
-            <a href="/" class="btn" style="display:inline-block; text-decoration:none;">Create New Link</a>
+            <a href="/" class="btn" style="display:inline-block; margin-top: 2rem; text-decoration: none;">Shorten Another</a>
         </div>
         {% else %}
-        <!-- Shortener Form -->
+        <!-- INPUT VIEW -->
         <div class="card">
-            <div class="input-group">
-                <input type="url" id="longUrl" placeholder="Enter link here (e.g. google.com)" autocomplete="off">
-                <button id="shortenBtn" class="btn">Shorten</button>
-            </div>
-            <p id="error" class="error-msg"></p>
+            <form action="/shorten" method="POST" class="input-group">
+                <input type="url" name="url" placeholder="Paste link (e.g. google.com)" required autocomplete="off">
+                <button type="submit" class="btn">Shorten</button>
+            </form>
+            
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
 
-            <div id="result" class="result-area">
+            {% if short_url %}
+            <div class="result-area">
                 <div class="url-box">
-                    <input type="text" id="shortUrlInput" readonly>
-                    <button id="copyBtn" class="copy-btn">Copy</button>
+                    <input type="text" id="shortUrlField" value="{{ short_url }}" readonly>
+                    <button class="copy-btn" onclick="copyLink()">Copy</button>
                 </div>
                 <div id="qrcode"></div>
-                <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 10px;">
-                    💡 Pro Tip: Add <b>+</b> to the end of your link to see stats!
+                <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 15px;">
+                    💡 Tip: Add <b>+</b> at the end of the link to track clicks!
                 </p>
             </div>
+            {% endif %}
         </div>
         {% endif %}
 
@@ -263,44 +245,26 @@
     </div>
 
     <script>
-        const shortenBtn = document.getElementById('shortenBtn');
-        const longUrl = document.getElementById('longUrl');
-        const resultArea = document.getElementById('result');
-        const shortUrlInput = document.getElementById('shortUrlInput');
-        const errorMsg = document.getElementById('error');
-        const qrDiv = document.getElementById('qrcode');
+        function copyLink() {
+            const copyText = document.getElementById("shortUrlField");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            
+            const btn = document.querySelector('.copy-btn');
+            btn.innerText = "Copied!";
+            setTimeout(() => btn.innerText = "Copy", 2000);
+        }
 
-        if(shortenBtn) {
-            shortenBtn.addEventListener('click', async () => {
-                const urlValue = longUrl.value.trim();
-                errorMsg.innerText = "";
-
-                if(!urlValue) {
-                    errorMsg.innerText = "Please enter a URL first.";
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/shorten', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ url: urlValue })
-                    });
-                    const data = await response.json();
-
-                    if(response.ok) {
-                        shortUrlInput.value = data.short_url;
-                        resultArea.style.display = 'block';
-                        
-                        // Generate QR
-                        qrDiv.innerHTML = "";
-                        new QRCode(qrDiv, {
-                            text: data.short_url,
-                            width: 120,
-                            height: 120,
-                            colorDark : "#000000",
-                            colorLight : "#ffffff"
-                        });
-                    } else {
-                        errorMsg.innerText = data.error;
-                    }
+        {% if short_url %}
+        new QRCode(document.getElementById("qrcode"), {
+            text: "{{ short_url }}",
+            width: 128,
+            height: 128,
+            colorDark : "#000000",
+            colorLight : "#ffffff"
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

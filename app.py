@@ -1,16 +1,15 @@
 import os
 import string
 import random
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
 
 # Database Configuration
-# For Render, SQLite works, but note that the file is deleted on every redeploy.
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'urls.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'wafyurl.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -22,7 +21,7 @@ class URL(db.Model):
     clicks = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create database tables
+# Create tables
 with app.app_context():
     db.create_all()
 
@@ -33,39 +32,35 @@ def generate_short_code(length=6):
         if not URL.query.filter_by(short_code=code).first():
             return code
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
 @app.route('/shorten', methods=['POST'])
 def shorten():
-    data = request.get_json()
-    long_url = data.get('url', '').strip()
+    long_url = request.form.get('url', '').strip()
 
     if not long_url:
-        return jsonify({'error': 'Please provide a valid URL'}), 400
+        return render_template('index.html', error="Please enter a URL.")
 
-    # AUTO-PREFIX LOGIC: Add https:// if user forgot protocol
+    # AUTO-PREFIX LOGIC
     if not (long_url.startswith('http://') or long_url.startswith('https://')):
         long_url = 'https://' + long_url
 
-    # Check if URL already exists
+    # Check if exists
     existing = URL.query.filter_by(original_url=long_url).first()
     if existing:
-        return jsonify({
-            'short_url': f"{request.host_url}{existing.short_code}", 
-            'short_code': existing.short_code
-        })
+        short_url = f"{request.host_url}{existing.short_code}"
+        return render_template('index.html', short_url=short_url)
 
-    short_code = generate_short_code()
-    new_url = URL(original_url=long_url, short_code=short_code)
+    # Create new
+    code = generate_short_code()
+    new_url = URL(original_url=long_url, short_code=code)
     db.session.add(new_url)
     db.session.commit()
 
-    return jsonify({
-        'short_url': f"{request.host_url}{short_code}", 
-        'short_code': short_code
-    })
+    short_url = f"{request.host_url}{code}"
+    return render_template('index.html', short_url=short_url)
 
 @app.route('/<code_str>')
 def redirect_to_url(code_str):
@@ -73,9 +68,9 @@ def redirect_to_url(code_str):
     if code_str.endswith('+'):
         actual_code = code_str[:-1]
         url_entry = URL.query.filter_by(short_code=actual_code).first_or_404()
-        return render_template('index.html', stats=url_entry, base_url=request.host_url)
+        return render_template('index.html', stats=url_entry)
 
-    # Normal Redirection
+    # Standard Redirection
     url_entry = URL.query.filter_by(short_code=code_str).first_or_404()
     url_entry.clicks += 1
     db.session.commit()
