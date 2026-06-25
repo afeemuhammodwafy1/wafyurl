@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WafyURL | Modern URL Shortener</title>
+    <title>WafyURL | Premium URL Shortener</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -63,7 +63,7 @@
             width: 100%;
         }
 
-        /* Responsive Form */
+        /* Form Styling */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -101,6 +101,8 @@
             font-weight: 700;
             cursor: pointer;
             transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn:hover {
@@ -142,12 +144,40 @@
             cursor: pointer;
         }
 
+        /* QR Code & Download Section */
+        .qr-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
         #qrcode {
             background: white;
             padding: 12px;
             border-radius: 12px;
             display: inline-block;
-            margin-top: 10px;
+        }
+
+        .download-btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: none; /* Shown via JS when QR is ready */
+        }
+
+        .download-btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-glow);
         }
 
         /* Stats Section */
@@ -210,7 +240,7 @@
             <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 10px; word-break: break-all;">
                 Original: {{ stats.original_url }}
             </p>
-            <a href="/" class="btn" style="display:inline-block; margin-top: 2rem; text-decoration: none;">Shorten Another</a>
+            <a href="/" class="btn" style="margin-top: 2rem;">Shorten Another</a>
         </div>
         {% else %}
         <!-- INPUT VIEW -->
@@ -230,8 +260,14 @@
                     <input type="text" id="shortUrlField" value="{{ short_url }}" readonly>
                     <button class="copy-btn" onclick="copyLink()">Copy</button>
                 </div>
-                <div id="qrcode"></div>
-                <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 15px;">
+                
+                <div class="qr-wrapper">
+                    <div id="qrcode"></div>
+                    <!-- Download QR Button -->
+                    <a id="downloadBtn" class="download-btn">Download QR</a>
+                </div>
+
+                <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 20px;">
                     💡 Tip: Add <b>+</b> at the end of the link to track clicks!
                 </p>
             </div>
@@ -245,6 +281,7 @@
     </div>
 
     <script>
+        // Copy to clipboard
         function copyLink() {
             const copyText = document.getElementById("shortUrlField");
             copyText.select();
@@ -256,14 +293,37 @@
             setTimeout(() => btn.innerText = "Copy", 2000);
         }
 
+        // Handle QR Generation and Download logic
         {% if short_url %}
-        new QRCode(document.getElementById("qrcode"), {
+        const qrContainer = document.getElementById("qrcode");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        // Initialize QR Code
+        const qrcode = new QRCode(qrContainer, {
             text: "{{ short_url }}",
-            width: 128,
-            height: 128,
+            width: 150,
+            height: 150,
             colorDark : "#000000",
-            colorLight : "#ffffff"
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
         });
+
+        // Wait for QR to render then prepare download link
+        setTimeout(() => {
+            const qrImg = qrContainer.querySelector('img');
+            const qrCanvas = qrContainer.querySelector('canvas');
+            
+            if (qrImg) {
+                // If image is ready, use its src
+                downloadBtn.href = qrImg.src;
+            } else if (qrCanvas) {
+                // Fallback to canvas data
+                downloadBtn.href = qrCanvas.toDataURL("image/png");
+            }
+            
+            downloadBtn.download = "wafyurl_qr.png";
+            downloadBtn.style.display = "inline-block";
+        }, 500);
         {% endif %}
     </script>
 </body>
