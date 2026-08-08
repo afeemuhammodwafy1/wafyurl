@@ -589,6 +589,7 @@ select option {
     color: var(--neon-blue);
     padding: 0 14px;
     font-size: 1rem;
+    flex-shrink: 0;
 }
 
 #shortenedUrl {
@@ -601,11 +602,17 @@ select option {
     font-family: inherit;
     outline: none;
     min-height: 52px;
+    min-width: 0;
 }
 
+/* ============================================
+   COPY BUTTON - FIXED FOR MOBILE
+   ============================================ */
+
 .btn-copy {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     background: transparent;
     border: none;
@@ -617,11 +624,22 @@ select option {
     transition: var(--transition);
     font-family: inherit;
     border-left: 1px solid var(--border-color);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-copy:hover {
     background: rgba(0, 210, 255, 0.08);
 }
+
+.btn-copy i {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   RESULT ACTIONS
+   ============================================ */
 
 .result-actions {
     display: flex;
@@ -1093,7 +1111,7 @@ footer {
 }
 
 /* ============================================
-   RESPONSIVE - MOBILE
+   RESPONSIVE - MOBILE (FIXED COPY BUTTON)
    ============================================ */
 
 @media (max-width: 640px) {
@@ -1173,6 +1191,44 @@ footer {
         font-size: 0.85rem;
     }
 
+    /* ==========================================
+       FIX: COPY BUTTON - SINGLE LINE ON MOBILE
+       ========================================== */
+
+    .url-output {
+        flex-wrap: wrap;
+    }
+
+    .output-icon {
+        display: none;
+    }
+
+    #shortenedUrl {
+        font-size: 0.8rem;
+        min-height: 40px;
+        padding: 10px 12px;
+        width: 100%;
+        text-align: center;
+        flex: 0 0 100%;
+    }
+
+    .btn-copy {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+        gap: 8px;
+        white-space: nowrap;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        width: 100%;
+        justify-content: center;
+        flex-shrink: 1;
+    }
+
+    .btn-copy i {
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
     /* Mobile touch optimizations */
     .btn:hover {
         transform: none !important;
@@ -1215,22 +1271,20 @@ footer {
         font-size: 2rem;
     }
 
-    .url-output {
-        flex-wrap: wrap;
-    }
-
     #shortenedUrl {
-        font-size: 0.8rem;
-        min-height: 40px;
+        font-size: 0.75rem;
+        min-height: 36px;
+        padding: 8px 10px;
     }
 
     .btn-copy {
         padding: 8px 14px;
+        font-size: 0.75rem;
+        gap: 6px;
+    }
+
+    .btn-copy i {
         font-size: 0.8rem;
-        border-left: none;
-        border-top: 1px solid var(--border-color);
-        width: 100%;
-        justify-content: center;
     }
 
     .features {
