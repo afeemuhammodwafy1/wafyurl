@@ -1,3 +1,7 @@
+/* ============================================
+   ROOT VARIABLES
+   ============================================ */
+
 :root {
     --bg-primary: #050608;
     --bg-secondary: #0a0b10;
@@ -22,14 +26,19 @@
     
     --radius: 16px;
     --radius-sm: 10px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -48,21 +57,33 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
 
 ::-webkit-scrollbar {
     width: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--bg-primary);
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--neon-blue);
     border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: var(--neon-glow-strong);
 }
+
+/* ============================================
+   BACKGROUND GLOW (GPU Optimized)
+   ============================================ */
 
 .bg-glow {
     position: fixed;
@@ -74,12 +95,25 @@ body {
     z-index: -1;
     filter: blur(80px);
     animation: glowPulse 8s ease-in-out infinite alternate;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 @keyframes glowPulse {
-    0% { opacity: 0.6; transform: scale(1) rotate(0deg); }
-    100% { opacity: 1; transform: scale(1.05) rotate(2deg); }
+    0% {
+        opacity: 0.6;
+        transform: scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.05) rotate(2deg);
+    }
 }
+
+/* ============================================
+   CONTAINER
+   ============================================ */
 
 .container {
     width: 100%;
@@ -87,6 +121,10 @@ body {
     position: relative;
     z-index: 1;
 }
+
+/* ============================================
+   HEADER
+   ============================================ */
 
 header {
     text-align: center;
@@ -110,11 +148,17 @@ header {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: logoPulse 3s ease-in-out infinite;
+    will-change: filter;
+    transform: translateZ(0);
 }
 
 @keyframes logoPulse {
-    0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.1)); }
-    50% { filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.2)); }
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.1));
+    }
+    50% {
+        filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.2));
+    }
 }
 
 .logo span {
@@ -128,6 +172,10 @@ header {
     font-weight: 400;
 }
 
+/* ============================================
+   CARD
+   ============================================ */
+
 .card {
     background: var(--bg-card);
     padding: clamp(1.8rem, 5vw, 2.8rem);
@@ -137,11 +185,17 @@ header {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     transition: var(--transition);
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .card:hover {
     border-color: var(--border-hover);
 }
+
+/* ============================================
+   INPUT SECTION
+   ============================================ */
 
 .input-section {
     display: flex;
@@ -208,6 +262,10 @@ header {
     color: var(--neon-blue);
     background: rgba(0, 210, 255, 0.08);
 }
+
+/* ============================================
+   INPUT OPTIONS
+   ============================================ */
 
 .input-options {
     display: grid;
@@ -309,6 +367,10 @@ select option {
     margin-top: 4px;
 }
 
+/* ============================================
+   BUTTONS
+   ============================================ */
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -319,10 +381,12 @@ select option {
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     text-decoration: none;
     font-family: inherit;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .btn-primary {
@@ -351,7 +415,10 @@ select option {
     transform: none !important;
 }
 
-/* Bulk Section */
+/* ============================================
+   BULK SECTION
+   ============================================ */
+
 .bulk-section {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
@@ -383,7 +450,6 @@ select option {
 
 .bulk-area {
     margin-top: 1rem;
-    animation: fadeSlideUp 0.4s ease-out;
 }
 
 .bulk-input-wrapper {
@@ -436,7 +502,6 @@ select option {
     border-radius: var(--radius-sm);
     margin-bottom: 8px;
     border: 1px solid var(--border-color);
-    animation: fadeSlideUp 0.3s ease-out;
 }
 
 .bulk-item .original {
@@ -483,17 +548,14 @@ select option {
     color: var(--error);
 }
 
-/* Result Section */
+/* ============================================
+   RESULT SECTION
+   ============================================ */
+
 .result-section {
     margin-top: 2rem;
-    animation: fadeSlideUp 0.5s ease-out;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
-}
-
-@keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 .result-divider {
@@ -597,30 +659,29 @@ select option {
 }
 
 /* ============================================
-   QR SECTION (UPDATED)
+   QR SECTION (Centered)
    ============================================ */
 
 .qr-section {
-    margin-top: 1.8rem;
-    animation: fadeIn 0.4s ease-out;
+    margin-top: 2rem;
     padding: 0.5rem 0;
 }
 
 .qr-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 0.9rem;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
     width: 100%;
 }
 
 #qrcode {
     display: inline-block;
     background: #ffffff;
-    padding: 14px;
-    border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    align-self: center;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     line-height: 0;
 }
 
@@ -629,13 +690,16 @@ select option {
     display: block;
     max-width: 100%;
     height: auto;
+    image-rendering: auto;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .btn-download-qr {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 28px;
+    padding: 11px 32px;
     background: transparent;
     border: 2px solid var(--neon-blue);
     border-radius: var(--radius-sm);
@@ -644,9 +708,11 @@ select option {
     font-size: 0.9rem;
     font-family: inherit;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     letter-spacing: 0.3px;
-    margin-right: 2px;
+    align-self: center;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .btn-download-qr:hover {
@@ -660,7 +726,10 @@ select option {
     font-size: 1rem;
 }
 
-/* Stats View */
+/* ============================================
+   STATS VIEW
+   ============================================ */
+
 .stats-card {
     text-align: center;
 }
@@ -726,7 +795,10 @@ select option {
     margin-right: 8px;
 }
 
-/* Features */
+/* ============================================
+   FEATURES
+   ============================================ */
+
 .features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -763,7 +835,10 @@ select option {
     text-align: center;
 }
 
-/* Trust Section */
+/* ============================================
+   TRUST SECTION
+   ============================================ */
+
 .trust-section {
     margin-top: 2rem;
 }
@@ -791,7 +866,10 @@ select option {
     color: var(--text-dim);
 }
 
-/* Toast */
+/* ============================================
+   TOAST NOTIFICATION
+   ============================================ */
+
 .toast {
     position: fixed;
     bottom: 30px;
@@ -839,7 +917,10 @@ select option {
     color: var(--error);
 }
 
-/* Modal */
+/* ============================================
+   MODAL
+   ============================================ */
+
 .modal {
     position: fixed;
     top: 0;
@@ -853,7 +934,6 @@ select option {
     justify-content: center;
     align-items: center;
     z-index: 999;
-    animation: fadeIn 0.3s ease-out;
 }
 
 .modal.hidden {
@@ -921,7 +1001,10 @@ select option {
     line-height: 1.6;
 }
 
-/* Footer */
+/* ============================================
+   FOOTER
+   ============================================ */
+
 footer {
     margin-top: 2.5rem;
     text-align: center;
@@ -952,92 +1035,195 @@ footer {
     color: var(--neon-blue);
 }
 
+/* ============================================
+   UTILITY
+   ============================================ */
+
 .hidden {
     display: none !important;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
 }
 
-/* Responsive */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.result-section,
+.bulk-area,
+.bulk-item,
+.qr-section {
+    animation: fadeSlideUp 0.4s ease-out;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+/* ============================================
+   RESPONSIVE - TABLETS & MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .card {
+        padding: 2rem;
+    }
+
+    .input-options {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+
 @media (max-width: 640px) {
     body {
         padding: 12px;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
-    
+
     .card {
         padding: 1.5rem;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: var(--bg-card);
     }
-    
+
     .input-options {
         grid-template-columns: 1fr;
     }
-    
+
     .input-options .option-group:last-child {
         max-width: 200px;
     }
-    
+
     .logo {
         font-size: 2.4rem;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .result-actions {
         flex-direction: column;
     }
-    
+
     .result-actions button {
         justify-content: center;
     }
-    
+
     .features {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .bulk-item {
         flex-wrap: wrap;
     }
-    
+
     .bulk-item .short {
         min-width: auto;
         flex: 1;
     }
-    
+
     .modal-content {
         padding: 1.5rem;
         margin: 1rem;
     }
 
     .qr-wrapper {
-        align-items: center;
+        gap: 1rem;
     }
-    
+
+    #qrcode {
+        padding: 12px;
+    }
+
+    #qrcode img,
+    #qrcode canvas {
+        max-width: 140px;
+        height: auto;
+    }
+
     .btn-download-qr {
         width: 100%;
         justify-content: center;
-        margin-right: 0;
+        padding: 12px 20px;
+        font-size: 0.85rem;
+    }
+
+    /* Mobile touch optimizations */
+    .btn:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .btn:active {
+        transform: scale(0.97) !important;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.97) !important;
+    }
+
+    .toast,
+    .modal-content {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .result-section,
+    .bulk-area,
+    .bulk-item,
+    .qr-section {
+        animation-duration: 0.25s !important;
+    }
+
+    .container {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
     }
 }
+
+/* ============================================
+   RESPONSIVE - SMALL MOBILE
+   ============================================ */
 
 @media (max-width: 400px) {
     .logo {
         font-size: 2rem;
     }
-    
+
     .url-output {
         flex-wrap: wrap;
     }
-    
+
     #shortenedUrl {
         font-size: 0.8rem;
         min-height: 40px;
     }
-    
+
     .btn-copy {
         padding: 8px 14px;
         font-size: 0.8rem;
@@ -1046,8 +1232,46 @@ footer {
         width: 100%;
         justify-content: center;
     }
-    
+
     .features {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    #qrcode {
+        padding: 10px;
+    }
+
+    #qrcode img,
+    #qrcode canvas {
+        max-width: 120px;
+        height: auto;
+    }
+
+    .btn-download-qr {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+        gap: 8px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - LARGE SCREENS
+   ============================================ */
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 780px;
+    }
+
+    .card {
+        padding: 3rem;
+    }
+
+    .features {
+        gap: 16px;
+    }
+
+    .feature-item {
+        padding: 16px 12px;
     }
 }

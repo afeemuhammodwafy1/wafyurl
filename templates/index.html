@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ meta.title if meta else 'wafyurl - Premium URL Shortener' }}</title>
-    <meta name="description" content="{{ meta.description if meta else 'Shorten your long URLs with wafyurl. Fast, secure, with analytics and bulk shortening.' }}">
+    <title>wafyurl - Premium URL Shortener</title>
+    <meta name="description" content="Shorten your long URLs with wafyurl. Fast, secure, with analytics and bulk shortening.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{{ meta.canonical if meta else request.url }}">
+    <link rel="canonical" href="{{ request.url }}">
     
     <meta property="og:type" content="website">
     <meta property="og:title" content="wafyurl - Premium URL Shortener">
@@ -214,7 +214,7 @@
                     </button>
                 </div>
                 
-                <!-- ===== UPDATED QR SECTION ===== -->
+                <!-- ===== QR SECTION (CENTERED) ===== -->
                 <div id="qrSection" class="qr-section hidden">
                     <div class="qr-wrapper">
                         <div id="qrcode"></div>
