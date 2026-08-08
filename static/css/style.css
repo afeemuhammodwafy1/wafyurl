@@ -596,28 +596,37 @@ select option {
     background: rgba(0, 210, 255, 0.05);
 }
 
-/* QR Section */
+/* ============================================
+   QR SECTION (UPDATED)
+   ============================================ */
+
 .qr-section {
-    margin-top: 1.5rem;
-    text-align: center;
+    margin-top: 1.8rem;
     animation: fadeIn 0.4s ease-out;
+    padding: 0.5rem 0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+.qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.9rem;
+    width: 100%;
 }
 
 #qrcode {
     display: inline-block;
-    background: white;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 0.8rem;
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    align-self: center;
+    line-height: 0;
 }
 
 #qrcode img,
 #qrcode canvas {
+    display: block;
     max-width: 100%;
     height: auto;
 }
@@ -625,23 +634,30 @@ select option {
 .btn-download-qr {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 24px;
+    gap: 10px;
+    padding: 10px 28px;
     background: transparent;
     border: 2px solid var(--neon-blue);
     border-radius: var(--radius-sm);
     color: var(--neon-blue);
     font-weight: 600;
     font-size: 0.9rem;
+    font-family: inherit;
     cursor: pointer;
     transition: var(--transition);
-    font-family: inherit;
+    letter-spacing: 0.3px;
+    margin-right: 2px;
 }
 
 .btn-download-qr:hover {
     background: var(--neon-blue);
-    color: #000;
-    box-shadow: 0 0 25px var(--neon-glow-strong);
+    color: #000000;
+    box-shadow: 0 0 30px var(--neon-glow-strong);
+    transform: translateY(-2px);
+}
+
+.btn-download-qr i {
+    font-size: 1rem;
 }
 
 /* Stats View */
@@ -940,6 +956,11 @@ footer {
     display: none !important;
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     body {
@@ -990,6 +1011,16 @@ footer {
     .modal-content {
         padding: 1.5rem;
         margin: 1rem;
+    }
+
+    .qr-wrapper {
+        align-items: center;
+    }
+    
+    .btn-download-qr {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
     }
 }
 
