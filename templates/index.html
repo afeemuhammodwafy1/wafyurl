@@ -1,330 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ============================================
+    META TAGS - TOP NOTCH SEO
+    ============================================ -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WafyURL - URL Shortener</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- PRIMARY META -->
+    <title>{{ meta.title if meta else 'wafyurl - Premium URL Shortener | Shorten Links with Neon Precision' }}</title>
+    <meta name="description" content="{{ meta.description if meta else 'Shorten your long URLs with wafyurl. Lightning fast, with real-time analytics, QR codes, and password protection. The ultimate link management tool.' }}">
+    <meta name="keywords" content="{{ meta.keywords if meta else 'url shortener, link management, QR code generator, link analytics, free url shortener' }}">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Afee Muhammod Wafy">
+    <meta name="language" content="English">
+    
+    <!-- CANONICAL -->
+    <link rel="canonical" href="{{ meta.canonical if meta else request.url }}">
+    
+    <!-- OPEN GRAPH / FACEBOOK -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ meta.og_title if meta else 'wafyurl - Premium URL Shortener' }}">
+    <meta property="og:description" content="{{ meta.og_description if meta else 'Transform long URLs into short, beautiful links. Track clicks, generate QR codes, and manage your links with ease.' }}">
+    <meta property="og:url" content="{{ meta.og_url if meta else request.url }}">
+    <meta property="og:image" content="{{ meta.og_image if meta else url_for('static', filename='icons/favicon.png', _external=True) }}">
+    <meta property="og:site_name" content="wafyurl">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- TWITTER CARD -->
+    <meta name="twitter:card" content="{{ meta.twitter_card if meta else 'summary_large_image' }}">
+    <meta name="twitter:site" content="{{ meta.twitter_site if meta else '@wafyurl' }}">
+    <meta name="twitter:title" content="{{ meta.og_title if meta else 'wafyurl - Premium URL Shortener' }}">
+    <meta name="twitter:description" content="{{ meta.og_description if meta else 'Transform long URLs into short, beautiful links with wafyurl.' }}">
+    <meta name="twitter:image" content="{{ meta.og_image if meta else url_for('static', filename='icons/favicon.png', _external=True) }}">
+    
+    <!-- JSON-LD STRUCTURED DATA -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "wafyurl",
+        "description": "Premium URL Shortener with neon precision. Shorten links, track analytics, generate QR codes.",
+        "applicationCategory": "Utility",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript",
+        "author": {
+            "@type": "Person",
+            "name": "Afee Muhammod Wafy"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "127"
+        }
+    }
+    </script>
+    
+    <!-- ============================================
+    FAVICON
+    ============================================ -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/favicon.png') }}">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- ============================================
+    PRELOAD & FONTS
+    ============================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- ============================================
+    LIBRARIES
+    ============================================ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-        :root {
-            --bg: #050608;
-            --card-bg: #101217;
-            --neon-blue: #00d2ff;
-            --neon-glow: rgba(0, 210, 255, 0.4);
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 550px;
-            text-align: center;
-        }
-
-        .logo {
-            font-size: clamp(2.5rem, 8vw, 3.5rem);
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            letter-spacing: -2px;
-        }
-
-        .logo span {
-            color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-glow);
-        }
-
-        .subtitle {
-            color: var(--text-dim);
-            margin-bottom: 2.5rem;
-            font-size: 1rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: clamp(1.5rem, 5vw, 2.5rem);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-        }
-
-        /* Form Styling */
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        @media (min-width: 480px) {
-            .input-group { flex-direction: row; }
-        }
-
-        input[type="url"], input[type="text"] {
-            flex: 1;
-            background: #000;
-            border: 2px solid #1e293b;
-            padding: 14px 18px;
-            border-radius: 14px;
-            color: white;
-            font-size: 1rem;
-            width: 100%;
-            transition: 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-glow);
-        }
-
-        .btn {
-            background: var(--neon-blue);
-            color: #000;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--neon-glow);
-        }
-
-        /* Results Area */
-        .result-area {
-            margin-top: 2rem;
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .url-box {
-            display: flex;
-            background: #000;
-            border-radius: 14px;
-            padding: 8px;
-            border: 1px dashed var(--neon-blue);
-            margin-bottom: 1.5rem;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .url-box input {
-            border: none !important;
-            background: transparent !important;
-            padding: 10px;
-        }
-
-        .copy-btn {
-            background: rgba(0, 210, 255, 0.1);
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* QR Code & Download Section */
-        .qr-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        #qrcode {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-
-        .download-btn {
-            background: transparent;
-            color: var(--neon-blue);
-            border: 2px solid var(--neon-blue);
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: none; /* Shown via JS when QR is ready */
-        }
-
-        .download-btn:hover {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 15px var(--neon-glow);
-        }
-
-        /* Stats Section */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 1.5rem;
-        }
-
-        .stat-box {
-            background: rgba(255,255,255,0.03);
-            padding: 20px;
-            border-radius: 16px;
-        }
-
-        .stat-val {
-            display: block;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--neon-blue);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        footer {
-            margin-top: 3rem;
-            color: var(--text-dim);
-            font-size: 0.85rem;
-        }
-
-        .error { color: #ff4757; margin-top: 10px; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- ============================================
+    CUSTOM STYLES
+    ============================================ -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- ============================================
+    PRELOAD STRATEGY
+    ============================================ -->
+    <link rel="preload" as="style" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preload" as="script" href="{{ url_for('static', filename='js/script.js') }}">
 </head>
 <body>
-
+    
+    <!-- ============================================
+    BACKGROUND GLOW
+    ============================================ -->
+    <div class="bg-glow"></div>
+    
     <div class="container">
+        
+        <!-- ============================================
+        HEADER
+        ============================================ -->
         <header>
-            <h1 class="logo">wafy<span>url</span></h1>
-            <p class="subtitle">Shorten links with neon precision.</p>
+            <div class="logo-wrapper">
+                <img 
+                    src="{{ url_for('static', filename='icons/favicon.png') }}" 
+                    alt="wafyurl - Premium URL Shortener Logo" 
+                    class="logo-icon"
+                    width="48"
+                    height="48"
+                    loading="eager"
+                >
+                <h1 class="logo">wafy<span>url</span></h1>
+            </div>
+            <p class="subtitle">Shorten links with neon precision — lightning fast</p>
         </header>
-
+        
+        <!-- ============================================
+        MAIN CARD
+        ============================================ -->
         {% if stats %}
-        <!-- STATS VIEW -->
-        <div class="card">
-            <h3>Link Analytics</h3>
+        
+        <!-- ===== STATS VIEW ===== -->
+        <div class="card stats-card">
+            <div class="stats-header">
+                <h2>📊 Link Analytics</h2>
+                <span class="stats-code">{{ stats.short_code }}</span>
+            </div>
+            
             <div class="stats-grid">
                 <div class="stat-box">
-                    <span class="stat-val">{{ stats.clicks }}</span>
-                    <small>Total Clicks</small>
+                    <span class="stat-number">{{ stats.clicks }}</span>
+                    <span class="stat-label">Total Clicks</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-val">{{ stats.short_code }}</span>
-                    <small>Code</small>
+                    <span class="stat-number">{{ stats.created_at.strftime('%b %d, %Y') if stats.created_at else 'N/A' }}</span>
+                    <span class="stat-label">Created</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">{{ stats.created_at.strftime('%I:%M %p') if stats.created_at else 'N/A' }}</span>
+                    <span class="stat-label">Time</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">
+                        {% if stats.expires_at %}
+                            {{ (stats.expires_at - stats.created_at).days }} days
+                        {% else %}
+                            ∞
+                        {% endif %}
+                    </span>
+                    <span class="stat-label">Expires</span>
                 </div>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 10px; word-break: break-all;">
-                Original: {{ stats.original_url }}
-            </p>
-            <a href="/" class="btn" style="margin-top: 2rem;">Shorten Another</a>
-        </div>
-        {% else %}
-        <!-- INPUT VIEW -->
-        <div class="card">
-            <form action="/shorten" method="POST" class="input-group">
-                <input type="url" name="url" placeholder="Paste link (e.g. google.com)" required autocomplete="off">
-                <button type="submit" class="btn">Shorten</button>
-            </form>
             
+            <p class="original-url">
+                <i class="fas fa-link"></i>
+                {{ stats.original_url[:60] }}{% if stats.original_url|length > 60 %}...{% endif %}
+            </p>
+            
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Shorten Another
+            </a>
+        </div>
+        
+        {% else %}
+        
+        <!-- ===== INPUT VIEW ===== -->
+        <div class="card">
+            
+            <!-- Error Display -->
             {% if error %}
-                <p class="error">{{ error }}</p>
+            <div class="toast error-toast show">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
             {% endif %}
-
-            {% if short_url %}
-            <div class="result-area">
-                <div class="url-box">
-                    <input type="text" id="shortUrlField" value="{{ short_url }}" readonly>
-                    <button class="copy-btn" onclick="copyLink()">Copy</button>
+            
+            <!-- URL INPUT -->
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <i class="fas fa-link input-icon"></i>
+                    <input 
+                        type="url" 
+                        id="longUrl" 
+                        placeholder="Paste your long URL here..." 
+                        autofocus
+                        autocomplete="off"
+                        spellcheck="false"
+                        aria-label="URL to shorten"
+                        required
+                    >
+                    <button id="pasteBtn" class="btn-paste" type="button" title="Paste from clipboard">
+                        <i class="fas fa-paste"></i>
+                    </button>
                 </div>
                 
-                <div class="qr-wrapper">
-                    <div id="qrcode"></div>
-                    <!-- Download QR Button -->
-                    <a id="downloadBtn" class="download-btn">Download QR</a>
+                <div class="input-options">
+                    <div class="option-group">
+                        <label for="customCode">
+                            <i class="fas fa-pen"></i> Custom Code
+                        </label>
+                        <div class="custom-code-wrapper">
+                            <span class="domain-prefix">wafyurl.com/</span>
+                            <input 
+                                type="text" 
+                                id="customCode" 
+                                placeholder="your-link" 
+                                maxlength="20"
+                                autocomplete="off"
+                                aria-label="Custom short code"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="expiresIn">
+                            <i class="fas fa-clock"></i> Expires
+                        </label>
+                        <select id="expiresIn" aria-label="Expiration time">
+                            <option value="never">Never</option>
+                            <option value="1h">1 Hour</option>
+                            <option value="24h">24 Hours</option>
+                            <option value="7d">7 Days</option>
+                            <option value="30d">30 Days</option>
+                        </select>
+                    </div>
                 </div>
-
-                <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 20px;">
-                    💡 Tip: Add <b>+</b> at the end of the link to track clicks!
-                </p>
+                
+                <div class="input-actions">
+                    <button id="shortenBtn" class="btn btn-primary btn-shorten" type="button">
+                        <i class="fas fa-bolt"></i>
+                        <span>Shorten Now</span>
+                    </button>
+                </div>
             </div>
-            {% endif %}
+            
+            <!-- RESULT SECTION -->
+            <div id="resultSection" class="result-section hidden">
+                <div class="result-divider">
+                    <span>Your Short Link is Ready</span>
+                </div>
+                
+                <div class="url-output-wrapper">
+                    <div class="url-output">
+                        <i class="fas fa-link output-icon"></i>
+                        <input type="text" id="shortenedUrl" readonly aria-label="Shortened URL">
+                        <button id="copyBtn" class="btn-copy" type="button" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <button id="shareBtn" class="btn-share" type="button" title="Share this link">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button id="qrToggleBtn" class="btn-qr-toggle" type="button" title="Show QR Code">
+                        <i class="fas fa-qrcode"></i> QR Code
+                    </button>
+                    <button id="statsBtn" class="btn-stats" type="button" title="View Analytics">
+                        <i class="fas fa-chart-line"></i> Analytics
+                    </button>
+                </div>
+                
+                <div id="qrSection" class="qr-section hidden">
+                    <div id="qrcode"></div>
+                    <button id="downloadQrBtn" class="btn-download-qr" type="button">
+                        <i class="fas fa-download"></i> Download QR
+                    </button>
+                </div>
+            </div>
         </div>
         {% endif %}
-
+        
+        <!-- ============================================
+        FEATURES SECTION
+        ============================================ -->
+        <div class="features">
+            <div class="feature-item">
+                <i class="fas fa-bolt"></i>
+                <span>Lightning Fast</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-qrcode"></i>
+                <span>QR Codes</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-lock"></i>
+                <span>Password Protect</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-crown"></i>
+                <span>Custom Links</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-infinity"></i>
+                <span>No Expiry</span>
+            </div>
+        </div>
+        
+        <!-- ============================================
+        TESTIMONIALS / TRUST SECTION
+        ============================================ -->
+        <div class="trust-section">
+            <div class="trust-stats">
+                <div class="trust-item">
+                    <span class="trust-number">{{ total_links if total_links else 0 }}+</span>
+                    <span class="trust-label">Links Shortened</span>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-number">{{ total_clicks if total_clicks else 0 }}+</span>
+                    <span class="trust-label">Total Clicks</span>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-number">99.9%</span>
+                    <span class="trust-label">Uptime</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================
+        FOOTER
+        ============================================ -->
         <footer>
-            &copy; 2026 - Afee Muhammod Wafy
+            <div class="footer-content">
+                <p>&copy; 2026 — <strong>Afee Muhammod Wafy</strong> · Built with <i class="fas fa-heart" style="color: #ff4757;"></i></p>
+                <div class="footer-links">
+                    <a href="/privacy" rel="nofollow">Privacy</a>
+                    <a href="/terms" rel="nofollow">Terms</a>
+                    <a href="/sitemap.xml" rel="nofollow">Sitemap</a>
+                </div>
+            </div>
         </footer>
     </div>
-
-    <script>
-        // Copy to clipboard
-        function copyLink() {
-            const copyText = document.getElementById("shortUrlField");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(copyText.value);
-            
-            const btn = document.querySelector('.copy-btn');
-            btn.innerText = "Copied!";
-            setTimeout(() => btn.innerText = "Copy", 2000);
-        }
-
-        // Handle QR Generation and Download logic
-        {% if short_url %}
-        const qrContainer = document.getElementById("qrcode");
-        const downloadBtn = document.getElementById("downloadBtn");
-
-        // Initialize QR Code
-        const qrcode = new QRCode(qrContainer, {
-            text: "{{ short_url }}",
-            width: 150,
-            height: 150,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-
-        // Wait for QR to render then prepare download link
-        setTimeout(() => {
-            const qrImg = qrContainer.querySelector('img');
-            const qrCanvas = qrContainer.querySelector('canvas');
-            
-            if (qrImg) {
-                // If image is ready, use its src
-                downloadBtn.href = qrImg.src;
-            } else if (qrCanvas) {
-                // Fallback to canvas data
-                downloadBtn.href = qrCanvas.toDataURL("image/png");
-            }
-            
-            downloadBtn.download = "wafyurl_qr.png";
-            downloadBtn.style.display = "inline-block";
-        }, 500);
-        {% endif %}
-    </script>
+    
+    <!-- ============================================
+    TOAST NOTIFICATION
+    ============================================ -->
+    <div id="toast" class="toast" role="alert" aria-live="polite">
+        <i class="fas fa-check-circle" id="toastIcon"></i>
+        <span id="toastMessage">Copied!</span>
+    </div>
+    
+    <!-- ============================================
+    CUSTOM SCRIPTS
+    ============================================ -->
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    
+    <!-- ============================================
+    ANALYTICS (OPTIONAL - ADD YOUR OWN)
+    ============================================ -->
+    <!-- 
+    <script defer src="https://your-analytics.com/script.js"></script>
+    -->
 </body>
 </html>

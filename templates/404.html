@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Link Not Found | wafyurl</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .error-page {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .error-page .error-code {
+            font-size: 6rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .error-page h2 {
+            font-size: 1.8rem;
+            margin: 0.5rem 0;
+        }
+        .error-page p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .error-page .btn {
+            display: inline-block;
+            padding: 12px 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="container">
+        <div class="card error-page">
+            <div class="error-code">404</div>
+            <h2>Oops! Link Not Found</h2>
+            <p>The link you're looking for doesn't exist or may have been removed.</p>
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i> Go to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
