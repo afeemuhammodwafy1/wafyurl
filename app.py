@@ -309,6 +309,56 @@ def shorten():
         'has_password': bool(password)
     })
 
+# ============================================
+# ✅ NEW: PASSWORD VERIFICATION ROUTE
+# ============================================
+@app.route('/verify-password', methods=['POST'])
+def verify_password():
+    data = request.get_json()
+    code = data.get('code', '').strip()
+    password = data.get('password', '').strip()
+    
+    if not code or not password:
+        return jsonify({'error': 'Code and password are required'}), 400
+    
+    # Find the URL
+    url_entry = URL.query.filter_by(short_code=code, is_active=True).first()
+    if not url_entry:
+        url_entry = URL.query.filter_by(custom_code=code, is_active=True).first()
+        if not url_entry:
+            return jsonify({'error': 'Link not found'}), 404
+    
+    # Check if password protected
+    if not url_entry.password_hash:
+        return jsonify({'error': 'This link is not password protected'}), 400
+    
+    # Verify password
+    if hashlib.sha256(password.encode()).hexdigest() == url_entry.password_hash:
+        # Log the click (optional, but good for analytics)
+        try:
+            click = ClickLog(
+                url_id=url_entry.id,
+                ip_address=get_client_ip(),
+                user_agent=request.headers.get('User-Agent', ''),
+                referer=request.headers.get('Referer', ''),
+                device_type=detect_device(request.headers.get('User-Agent', '')),
+                browser=detect_browser(request.headers.get('User-Agent', '')),
+                os=detect_os(request.headers.get('User-Agent', ''))
+            )
+            db.session.add(click)
+            url_entry.clicks += 1
+            db.session.commit()
+            update_site_stats()
+        except:
+            db.session.rollback()
+        
+        return jsonify({
+            'success': True,
+            'url': url_entry.original_url
+        })
+    
+    return jsonify({'error': 'Incorrect password'}), 401
+
 @app.route('/<code_str>')
 def redirect_to_url(code_str):
     if code_str.endswith('+'):
@@ -331,6 +381,7 @@ def redirect_to_url(code_str):
         db.session.commit()
         abort(410)
     
+    # ✅ Check for password
     if url_entry.password_hash:
         return render_template('password.html', code=code_str)
     
