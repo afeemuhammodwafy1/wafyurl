@@ -269,7 +269,7 @@ header {
 
 .input-options {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
 
@@ -291,6 +291,10 @@ header {
 .option-group label i {
     color: var(--neon-blue);
     font-size: 0.75rem;
+}
+
+.option-group.full-width {
+    grid-column: 1 / -1;
 }
 
 .custom-code-wrapper {
@@ -363,8 +367,59 @@ select option {
     color: var(--text-primary);
 }
 
-.input-actions {
-    margin-top: 4px;
+/* ============================================
+   PASSWORD FIELD
+   ============================================ */
+
+.password-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.password-wrapper:focus-within {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 12px var(--neon-glow);
+}
+
+#password {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    min-height: 44px;
+    width: 100%;
+}
+
+#password::placeholder {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+.btn-toggle-password {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 0 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+}
+
+.btn-toggle-password:hover {
+    color: var(--neon-blue);
 }
 
 /* ============================================
@@ -1134,6 +1189,10 @@ footer {
 
     .input-options .option-group:last-child {
         max-width: 200px;
+    }
+
+    .option-group.full-width {
+        grid-column: 1;
     }
 
     .logo {
