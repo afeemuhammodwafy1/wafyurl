@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>wafyurl - Premium URL Shortener</title>
+    <title>WafyUrl - URL Shortener</title>
     <meta name="description" content="Shorten your long URLs with wafyurl. Fast, secure, with analytics and bulk shortening.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ request.url }}">
@@ -116,9 +116,9 @@
                     </button>
                 </div>
                 
-                <!-- ===== INPUT OPTIONS WITH PASSWORD FIELD ===== -->
+                <!-- ===== INPUT OPTIONS (Custom Code → Password → Expires) ===== -->
                 <div class="input-options">
-                    <!-- Custom Code -->
+                    <!-- 1. Custom Code -->
                     <div class="option-group">
                         <label for="customCode">
                             <i class="fas fa-pen"></i> Custom Code
@@ -136,22 +136,8 @@
                         </div>
                     </div>
                     
-                    <!-- Expiry -->
+                    <!-- 2. Password (Optional) -->
                     <div class="option-group">
-                        <label for="expiresIn">
-                            <i class="fas fa-clock"></i> Expires
-                        </label>
-                        <select id="expiresIn" aria-label="Expiration time">
-                            <option value="never">Never</option>
-                            <option value="1h">1 Hour</option>
-                            <option value="24h">24 Hours</option>
-                            <option value="7d">7 Days</option>
-                            <option value="30d">30 Days</option>
-                        </select>
-                    </div>
-
-                    <!-- ===== NEW: PASSWORD FIELD (Full Width) ===== -->
-                    <div class="option-group full-width">
                         <label for="password">
                             <i class="fas fa-lock"></i> Password (Optional)
                         </label>
@@ -167,6 +153,20 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                    </div>
+                    
+                    <!-- 3. Expires -->
+                    <div class="option-group">
+                        <label for="expiresIn">
+                            <i class="fas fa-clock"></i> Expires
+                        </label>
+                        <select id="expiresIn" aria-label="Expiration time">
+                            <option value="never">Never</option>
+                            <option value="1h">1 Hour</option>
+                            <option value="24h">24 Hours</option>
+                            <option value="7d">7 Days</option>
+                            <option value="30d">30 Days</option>
+                        </select>
                     </div>
                 </div>
                 
