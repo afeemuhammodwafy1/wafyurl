@@ -575,6 +575,10 @@ select option {
     margin-bottom: 1rem;
 }
 
+/* ============================================
+   URL OUTPUT - DESKTOP & MOBILE (SINGLE LINE)
+   ============================================ */
+
 .url-output {
     display: flex;
     align-items: center;
@@ -604,10 +608,6 @@ select option {
     min-height: 52px;
     min-width: 0;
 }
-
-/* ============================================
-   COPY BUTTON - FIXED FOR MOBILE
-   ============================================ */
 
 .btn-copy {
     display: inline-flex;
@@ -1097,7 +1097,7 @@ footer {
 }
 
 /* ============================================
-   RESPONSIVE - TABLETS & MOBILE
+   RESPONSIVE - TABLETS
    ============================================ */
 
 @media (max-width: 768px) {
@@ -1111,7 +1111,7 @@ footer {
 }
 
 /* ============================================
-   RESPONSIVE - MOBILE (FIXED COPY BUTTON)
+   RESPONSIVE - MOBILE (SINGLE LINE FIX)
    ============================================ */
 
 @media (max-width: 640px) {
@@ -1192,40 +1192,50 @@ footer {
     }
 
     /* ==========================================
-       FIX: COPY BUTTON - SINGLE LINE ON MOBILE
+       FIX: URL ICON + LINK ON SAME LINE
        ========================================== */
 
     .url-output {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        padding: 0 4px;
+        gap: 4px;
+        border-width: 2px;
     }
 
     .output-icon {
-        display: none;
+        display: inline-flex;
+        padding: 0 8px;
+        font-size: 0.9rem;
+        flex-shrink: 0;
     }
 
     #shortenedUrl {
-        font-size: 0.8rem;
-        min-height: 40px;
-        padding: 10px 12px;
-        width: 100%;
-        text-align: center;
-        flex: 0 0 100%;
+        font-size: 0.78rem;
+        min-height: 44px;
+        padding: 8px 4px;
+        text-align: left;
+        flex: 1;
+        min-width: 50px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .btn-copy {
-        padding: 10px 16px;
-        font-size: 0.8rem;
-        gap: 8px;
+        padding: 8px 12px;
+        font-size: 0.72rem;
+        gap: 4px;
         white-space: nowrap;
-        border-left: none;
-        border-top: 1px solid var(--border-color);
-        width: 100%;
+        border-left: 1px solid var(--border-color);
+        border-top: none;
+        width: auto;
+        flex-shrink: 0;
         justify-content: center;
-        flex-shrink: 1;
+        min-width: fit-content;
     }
 
     .btn-copy i {
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         flex-shrink: 0;
     }
 
@@ -1271,40 +1281,141 @@ footer {
         font-size: 2rem;
     }
 
-    #shortenedUrl {
-        font-size: 0.75rem;
-        min-height: 36px;
-        padding: 8px 10px;
+    .card {
+        padding: 1rem;
     }
 
-    .btn-copy {
-        padding: 8px 14px;
-        font-size: 0.75rem;
-        gap: 6px;
+    .subtitle {
+        font-size: 0.85rem;
     }
 
-    .btn-copy i {
+    .btn {
+        padding: 10px 16px;
         font-size: 0.8rem;
+    }
+
+    #longUrl {
+        font-size: 0.9rem !important;
+        padding: 12px 12px 12px 38px;
+        min-height: 48px;
+    }
+
+    .input-icon {
+        left: 12px;
+        font-size: 0.85rem;
+    }
+
+    .bulk-input-wrapper textarea {
+        font-size: 0.85rem;
+        padding: 12px 12px 12px 38px;
+        min-height: 80px;
     }
 
     .features {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .feature-item {
+        padding: 8px 4px;
+    }
+
+    .feature-item i {
+        font-size: 1rem;
+    }
+
+    .feature-item span {
+        font-size: 0.6rem;
     }
 
     #qrcode {
-        padding: 10px;
+        padding: 8px;
     }
 
     #qrcode img,
     #qrcode canvas {
-        max-width: 120px;
+        max-width: 100px;
         height: auto;
     }
 
     .btn-download-qr {
-        padding: 10px 16px;
-        font-size: 0.8rem;
+        padding: 8px 14px;
+        font-size: 0.75rem;
+        gap: 6px;
+        max-width: 200px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
         gap: 8px;
+    }
+
+    .stat-box {
+        padding: 12px 8px;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .modal-content {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+
+    .modal-close {
+        top: 8px;
+        right: 8px;
+        font-size: 1rem;
+        padding: 4px 8px;
+    }
+
+    #previewTitle {
+        font-size: 1rem;
+    }
+
+    #previewDesc {
+        font-size: 0.8rem;
+    }
+
+    .toast {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        bottom: 16px;
+        max-width: 90%;
+    }
+
+    .toast i {
+        font-size: 0.9rem;
+    }
+
+    /* Small mobile URL output */
+    .url-output {
+        padding: 0 2px;
+        gap: 2px;
+        border-width: 2px;
+    }
+
+    .output-icon {
+        padding: 0 6px;
+        font-size: 0.8rem;
+    }
+
+    #shortenedUrl {
+        font-size: 0.7rem;
+        min-height: 38px;
+        padding: 6px 4px;
+        min-width: 40px;
+    }
+
+    .btn-copy {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+        gap: 3px;
+    }
+
+    .btn-copy i {
+        font-size: 0.7rem;
     }
 }
 
