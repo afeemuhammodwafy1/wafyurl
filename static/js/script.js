@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     'use strict';
     
-    // Elements
+    // ============================================
+    // ELEMENTS
+    // ============================================
+    
     const shortenBtn = document.getElementById('shortenBtn');
     const longUrlInput = document.getElementById('longUrl');
     const customCodeInput = document.getElementById('customCode');
     const expiresInSelect = document.getElementById('expiresIn');
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
     const resultSection = document.getElementById('resultSection');
     const shortenedUrlInput = document.getElementById('shortenedUrl');
     const copyBtn = document.getElementById('copyBtn');
@@ -34,10 +39,32 @@ document.addEventListener('DOMContentLoaded', function() {
     let qrCodeInstance = null;
     let currentShortCode = '';
     
-    // Auto-focus
+    // ============================================
+    // PASSWORD TOGGLE (Show/Hide)
+    // ============================================
+    
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+        });
+    }
+    
+    // ============================================
+    // AUTO-FOCUS
+    // ============================================
+    
     if (longUrlInput) longUrlInput.focus();
     
-    // Paste functionality
+    // ============================================
+    // PASTE FUNCTIONALITY
+    // ============================================
+    
     if (pasteBtn) {
         pasteBtn.addEventListener('click', async function() {
             try {
@@ -56,7 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Enter key shortcut
+    // ============================================
+    // ENTER KEY SHORTCUT
+    // ============================================
+    
     longUrlInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -66,7 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Auto-prefix URL
+    // ============================================
+    // AUTO-PREFIX URL
+    // ============================================
+    
     longUrlInput.addEventListener('blur', function() {
         let url = this.value.trim();
         if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
@@ -74,7 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Bulk toggle
+    // ============================================
+    // BULK TOGGLE
+    // ============================================
+    
     if (bulkToggleBtn) {
         bulkToggleBtn.addEventListener('click', function() {
             if (bulkArea.classList.contains('hidden')) {
@@ -87,11 +123,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Shorten function
+    // ============================================
+    // SHORTEN FUNCTION
+    // ============================================
+    
     async function shortenUrl() {
         const url = longUrlInput.value.trim();
         const customCode = customCodeInput.value.trim();
         const expiresIn = expiresInSelect.value;
+        const password = passwordInput ? passwordInput.value.trim() : '';
         
         if (!url) {
             showToast('Please enter a URL', 'error');
@@ -103,14 +143,20 @@ document.addEventListener('DOMContentLoaded', function() {
         shortenBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Shortening...';
         
         try {
+            const payload = {
+                url: url,
+                custom_code: customCode || undefined,
+                expires_in: expiresIn
+            };
+            
+            if (password) {
+                payload.password = password;
+            }
+            
             const response = await fetch('/shorten', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: url,
-                    custom_code: customCode || undefined,
-                    expires_in: expiresIn
-                })
+                body: JSON.stringify(payload)
             });
             
             const data = await response.json();
@@ -162,7 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
         shortenBtn.addEventListener('click', shortenUrl);
     }
     
-    // Bulk shorten
+    // ============================================
+    // BULK SHORTEN
+    // ============================================
+    
     if (bulkShortenBtn) {
         bulkShortenBtn.addEventListener('click', async function() {
             const text = bulkUrls.value;
@@ -222,7 +271,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Copy function
+    // ============================================
+    // COPY FUNCTION
+    // ============================================
+    
     async function copyLink() {
         const url = shortenedUrlInput.value;
         if (!url) return;
@@ -245,7 +297,10 @@ document.addEventListener('DOMContentLoaded', function() {
         copyBtn.addEventListener('click', copyLink);
     }
     
-    // Share function
+    // ============================================
+    // SHARE FUNCTION
+    // ============================================
+    
     function shareLink() {
         const url = shortenedUrlInput.value;
         if (!url) return;
@@ -266,7 +321,10 @@ document.addEventListener('DOMContentLoaded', function() {
         shareBtn.addEventListener('click', shareLink);
     }
     
-    // QR toggle
+    // ============================================
+    // QR TOGGLE
+    // ============================================
+    
     if (qrToggleBtn) {
         qrToggleBtn.addEventListener('click', function() {
             if (qrSection.classList.contains('hidden')) {
@@ -282,7 +340,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // QR generation
+    // ============================================
+    // QR GENERATION
+    // ============================================
+    
     function generateQRCode(url) {
         if (!qrContainer) return;
         qrContainer.innerHTML = '';
@@ -325,7 +386,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Preview
+    // ============================================
+    // PREVIEW
+    // ============================================
+    
     async function showPreview(shortUrl) {
         if (!previewModal) return;
         
@@ -356,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (err) {
             previewTitle.textContent = 'Preview not available';
-            previewDesc.textContent = 'Could not fetch link preview. The website may not support previews.';
+            previewDesc.textContent = 'Could not fetch link preview.';
             previewImage.style.display = 'none';
         }
     }
@@ -367,7 +431,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Close modal on backdrop click
     if (previewModal) {
         previewModal.addEventListener('click', function(e) {
             if (e.target === this) {
@@ -376,7 +439,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Toast function
+    // ============================================
+    // TOAST FUNCTION
+    // ============================================
+    
     function showToast(message, type) {
         type = type || 'success';
         if (!toast || !toastMessage) return;
@@ -402,14 +468,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    // Utility: escape HTML
+    // ============================================
+    // UTILITY: ESCAPE HTML
+    // ============================================
+    
     function escapeHtml(text) {
         var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
     
-    // Utility: copy text
+    // ============================================
+    // UTILITY: COPY TEXT (Global)
+    // ============================================
+    
     window.copyText = function(text) {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(function() {
@@ -432,7 +504,10 @@ document.addEventListener('DOMContentLoaded', function() {
         showToast('Copied!');
     }
     
-    // Keyboard shortcuts: Ctrl+K for focus
+    // ============================================
+    // KEYBOARD SHORTCUTS: Ctrl+K
+    // ============================================
+    
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
