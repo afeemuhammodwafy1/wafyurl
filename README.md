@@ -1,4 +1,4 @@
-# wafyurl - Premium URL Shortener
+# WafyUrl - URL Shortener
 
 > **Shorten links with precision. Fast, secure, and analytics-driven.**
 
