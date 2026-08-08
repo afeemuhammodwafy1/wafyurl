@@ -116,7 +116,9 @@
                     </button>
                 </div>
                 
+                <!-- ===== INPUT OPTIONS WITH PASSWORD FIELD ===== -->
                 <div class="input-options">
+                    <!-- Custom Code -->
                     <div class="option-group">
                         <label for="customCode">
                             <i class="fas fa-pen"></i> Custom Code
@@ -134,6 +136,7 @@
                         </div>
                     </div>
                     
+                    <!-- Expiry -->
                     <div class="option-group">
                         <label for="expiresIn">
                             <i class="fas fa-clock"></i> Expires
@@ -145,6 +148,25 @@
                             <option value="7d">7 Days</option>
                             <option value="30d">30 Days</option>
                         </select>
+                    </div>
+
+                    <!-- ===== NEW: PASSWORD FIELD (Full Width) ===== -->
+                    <div class="option-group full-width">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password (Optional)
+                        </label>
+                        <div class="password-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                placeholder="Leave empty for public link" 
+                                autocomplete="off"
+                                aria-label="Password for link protection"
+                            >
+                            <button type="button" id="togglePassword" class="btn-toggle-password" title="Show/Hide Password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -214,7 +236,7 @@
                     </button>
                 </div>
                 
-                <!-- ===== QR SECTION (CENTERED) ===== -->
+                <!-- QR SECTION (CENTERED) -->
                 <div id="qrSection" class="qr-section hidden">
                     <div class="qr-wrapper">
                         <div id="qrcode"></div>
