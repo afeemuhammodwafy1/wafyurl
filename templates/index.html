@@ -1,136 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ============================================
-    META TAGS - TOP NOTCH SEO
-    ============================================ -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
-    <!-- PRIMARY META -->
-    <title>{{ meta.title if meta else 'wafyurl - Premium URL Shortener | Shorten Links with Neon Precision' }}</title>
-    <meta name="description" content="{{ meta.description if meta else 'Shorten your long URLs with wafyurl. Lightning fast, with real-time analytics, QR codes, and password protection. The ultimate link management tool.' }}">
-    <meta name="keywords" content="{{ meta.keywords if meta else 'url shortener, link management, QR code generator, link analytics, free url shortener' }}">
+    <title>{{ meta.title if meta else 'wafyurl - Premium URL Shortener' }}</title>
+    <meta name="description" content="{{ meta.description if meta else 'Shorten your long URLs with wafyurl. Fast, secure, with analytics and bulk shortening.' }}">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="Afee Muhammod Wafy">
-    <meta name="language" content="English">
-    
-    <!-- CANONICAL -->
     <link rel="canonical" href="{{ meta.canonical if meta else request.url }}">
     
-    <!-- OPEN GRAPH / FACEBOOK -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ meta.og_title if meta else 'wafyurl - Premium URL Shortener' }}">
-    <meta property="og:description" content="{{ meta.og_description if meta else 'Transform long URLs into short, beautiful links. Track clicks, generate QR codes, and manage your links with ease.' }}">
-    <meta property="og:url" content="{{ meta.og_url if meta else request.url }}">
-    <meta property="og:image" content="{{ meta.og_image if meta else url_for('static', filename='icons/favicon.png', _external=True) }}">
-    <meta property="og:site_name" content="wafyurl">
-    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="wafyurl - Premium URL Shortener">
+    <meta property="og:description" content="Shorten URLs with analytics, bulk shortening, and link previews.">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta name="twitter:card" content="summary_large_image">
     
-    <!-- TWITTER CARD -->
-    <meta name="twitter:card" content="{{ meta.twitter_card if meta else 'summary_large_image' }}">
-    <meta name="twitter:site" content="{{ meta.twitter_site if meta else '@wafyurl' }}">
-    <meta name="twitter:title" content="{{ meta.og_title if meta else 'wafyurl - Premium URL Shortener' }}">
-    <meta name="twitter:description" content="{{ meta.og_description if meta else 'Transform long URLs into short, beautiful links with wafyurl.' }}">
-    <meta name="twitter:image" content="{{ meta.og_image if meta else url_for('static', filename='icons/favicon.png', _external=True) }}">
-    
-    <!-- JSON-LD STRUCTURED DATA -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "wafyurl",
-        "description": "Premium URL Shortener with neon precision. Shorten links, track analytics, generate QR codes.",
-        "applicationCategory": "Utility",
-        "operatingSystem": "All",
-        "browserRequirements": "Requires JavaScript",
-        "author": {
-            "@type": "Person",
-            "name": "Afee Muhammod Wafy"
-        },
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "reviewCount": "127"
-        }
-    }
-    </script>
-    
-    <!-- ============================================
-    FAVICON
-    ============================================ -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/favicon.png') }}">
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- ============================================
-    PRELOAD & FONTS
-    ============================================ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- ============================================
-    LIBRARIES
-    ============================================ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- ============================================
-    CUSTOM STYLES
-    ============================================ -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
-    <!-- ============================================
-    PRELOAD STRATEGY
-    ============================================ -->
-    <link rel="preload" as="style" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="preload" as="script" href="{{ url_for('static', filename='js/script.js') }}">
 </head>
 <body>
     
-    <!-- ============================================
-    BACKGROUND GLOW
-    ============================================ -->
     <div class="bg-glow"></div>
     
     <div class="container">
         
-        <!-- ============================================
-        HEADER
-        ============================================ -->
         <header>
             <div class="logo-wrapper">
-                <img 
-                    src="{{ url_for('static', filename='icons/favicon.png') }}" 
-                    alt="wafyurl - Premium URL Shortener Logo" 
-                    class="logo-icon"
-                    width="48"
-                    height="48"
-                    loading="eager"
-                >
                 <h1 class="logo">wafy<span>url</span></h1>
             </div>
-            <p class="subtitle">Shorten links with neon precision — lightning fast</p>
+            <p class="subtitle">Shorten links with precision. Fast, secure, and analytics-driven.</p>
         </header>
         
-        <!-- ============================================
-        MAIN CARD
-        ============================================ -->
         {% if stats %}
         
-        <!-- ===== STATS VIEW ===== -->
         <div class="card stats-card">
             <div class="stats-header">
-                <h2>📊 Link Analytics</h2>
+                <h2>Link Analytics</h2>
                 <span class="stats-code">{{ stats.short_code }}</span>
             </div>
             
@@ -144,18 +55,24 @@
                     <span class="stat-label">Created</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-number">{{ stats.created_at.strftime('%I:%M %p') if stats.created_at else 'N/A' }}</span>
-                    <span class="stat-label">Time</span>
-                </div>
-                <div class="stat-box">
                     <span class="stat-number">
                         {% if stats.expires_at %}
                             {{ (stats.expires_at - stats.created_at).days }} days
                         {% else %}
-                            ∞
+                            <i class="fas fa-infinity"></i>
                         {% endif %}
                     </span>
                     <span class="stat-label">Expires</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">
+                        {% if stats.password_hash %}
+                            <i class="fas fa-lock"></i>
+                        {% else %}
+                            <i class="fas fa-unlock"></i>
+                        {% endif %}
+                    </span>
+                    <span class="stat-label">Protected</span>
                 </div>
             </div>
             
@@ -171,10 +88,8 @@
         
         {% else %}
         
-        <!-- ===== INPUT VIEW ===== -->
         <div class="card">
             
-            <!-- Error Display -->
             {% if error %}
             <div class="toast error-toast show">
                 <i class="fas fa-exclamation-circle"></i>
@@ -182,7 +97,7 @@
             </div>
             {% endif %}
             
-            <!-- URL INPUT -->
+            <!-- Single URL Input -->
             <div class="input-section">
                 <div class="input-wrapper">
                     <i class="fas fa-link input-icon"></i>
@@ -241,7 +156,33 @@
                 </div>
             </div>
             
-            <!-- RESULT SECTION -->
+            <!-- Bulk URL Input -->
+            <div class="bulk-section">
+                <div class="bulk-toggle">
+                    <button id="bulkToggleBtn" class="btn-bulk-toggle" type="button">
+                        <i class="fas fa-layer-group"></i> Bulk Shorten
+                    </button>
+                </div>
+                
+                <div id="bulkArea" class="bulk-area hidden">
+                    <div class="input-wrapper bulk-input-wrapper">
+                        <i class="fas fa-list input-icon"></i>
+                        <textarea 
+                            id="bulkUrls" 
+                            placeholder="Enter multiple URLs (one per line or comma separated)&#10;Example:&#10;google.com&#10;youtube.com&#10;github.com" 
+                            rows="4"
+                            spellcheck="false"
+                            aria-label="Bulk URLs to shorten"
+                        ></textarea>
+                    </div>
+                    <button id="bulkShortenBtn" class="btn btn-primary btn-bulk" type="button">
+                        <i class="fas fa-bolt"></i> Shorten All
+                    </button>
+                    <div id="bulkResults" class="bulk-results"></div>
+                </div>
+            </div>
+            
+            <!-- Result Section -->
             <div id="resultSection" class="result-section hidden">
                 <div class="result-divider">
                     <span>Your Short Link is Ready</span>
@@ -265,7 +206,10 @@
                     <button id="qrToggleBtn" class="btn-qr-toggle" type="button" title="Show QR Code">
                         <i class="fas fa-qrcode"></i> QR Code
                     </button>
-                    <button id="statsBtn" class="btn-stats" type="button" title="View Analytics">
+                    <button id="previewBtn" class="btn-preview" type="button" title="Preview link">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button id="statsBtn" class="btn-stats" type="button" title="View Analytics" style="display:none;">
                         <i class="fas fa-chart-line"></i> Analytics
                     </button>
                 </div>
@@ -280,9 +224,7 @@
         </div>
         {% endif %}
         
-        <!-- ============================================
-        FEATURES SECTION
-        ============================================ -->
+        <!-- Features Section -->
         <div class="features">
             <div class="feature-item">
                 <i class="fas fa-bolt"></i>
@@ -301,18 +243,16 @@
                 <span>Password Protect</span>
             </div>
             <div class="feature-item">
-                <i class="fas fa-crown"></i>
-                <span>Custom Links</span>
+                <i class="fas fa-layer-group"></i>
+                <span>Bulk Shorten</span>
             </div>
             <div class="feature-item">
-                <i class="fas fa-infinity"></i>
-                <span>No Expiry</span>
+                <i class="fas fa-eye"></i>
+                <span>Link Preview</span>
             </div>
         </div>
         
-        <!-- ============================================
-        TESTIMONIALS / TRUST SECTION
-        ============================================ -->
+        <!-- Trust Section -->
         <div class="trust-section">
             <div class="trust-stats">
                 <div class="trust-item">
@@ -330,39 +270,38 @@
             </div>
         </div>
         
-        <!-- ============================================
-        FOOTER
-        ============================================ -->
         <footer>
             <div class="footer-content">
-                <p>&copy; 2026 — <strong>Afee Muhammod Wafy</strong> · Built with <i class="fas fa-heart" style="color: #ff4757;"></i></p>
+                <p>&copy; 2026 <strong>Afee Muhammod Wafy</strong> &middot; Built with <i class="fas fa-heart" style="color: #ff4757;"></i></p>
                 <div class="footer-links">
-                    <a href="/privacy" rel="nofollow">Privacy</a>
-                    <a href="/terms" rel="nofollow">Terms</a>
                     <a href="/sitemap.xml" rel="nofollow">Sitemap</a>
                 </div>
             </div>
         </footer>
     </div>
     
-    <!-- ============================================
-    TOAST NOTIFICATION
-    ============================================ -->
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePreview()" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="previewContent">
+                <div id="previewImageWrapper">
+                    <img id="previewImage" src="" alt="Preview">
+                </div>
+                <h3 id="previewTitle">Loading preview...</h3>
+                <p id="previewDesc"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
     <div id="toast" class="toast" role="alert" aria-live="polite">
         <i class="fas fa-check-circle" id="toastIcon"></i>
         <span id="toastMessage">Copied!</span>
     </div>
     
-    <!-- ============================================
-    CUSTOM SCRIPTS
-    ============================================ -->
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
-    
-    <!-- ============================================
-    ANALYTICS (OPTIONAL - ADD YOUR OWN)
-    ============================================ -->
-    <!-- 
-    <script defer src="https://your-analytics.com/script.js"></script>
-    -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

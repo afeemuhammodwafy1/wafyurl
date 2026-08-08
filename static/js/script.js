@@ -1,12 +1,7 @@
-// ============================================
-// DOM READY
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     'use strict';
     
-    // ============================================
-    // ELEMENTS
-    // ============================================
+    // Elements
     const shortenBtn = document.getElementById('shortenBtn');
     const longUrlInput = document.getElementById('longUrl');
     const customCodeInput = document.getElementById('customCode');
@@ -16,51 +11,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copyBtn');
     const shareBtn = document.getElementById('shareBtn');
     const qrToggleBtn = document.getElementById('qrToggleBtn');
+    const previewBtn = document.getElementById('previewBtn');
     const statsBtn = document.getElementById('statsBtn');
     const qrSection = document.getElementById('qrSection');
     const qrContainer = document.getElementById('qrcode');
     const downloadQrBtn = document.getElementById('downloadQrBtn');
     const pasteBtn = document.getElementById('pasteBtn');
+    const bulkToggleBtn = document.getElementById('bulkToggleBtn');
+    const bulkArea = document.getElementById('bulkArea');
+    const bulkUrls = document.getElementById('bulkUrls');
+    const bulkShortenBtn = document.getElementById('bulkShortenBtn');
+    const bulkResults = document.getElementById('bulkResults');
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toastMessage');
     const toastIcon = document.getElementById('toastIcon');
+    const previewModal = document.getElementById('previewModal');
+    const previewImage = document.getElementById('previewImage');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDesc = document.getElementById('previewDesc');
     
     let currentShortUrl = '';
     let qrCodeInstance = null;
+    let currentShortCode = '';
     
-    // ============================================
-    // AUTO-FOCUS
-    // ============================================
-    if (longUrlInput) {
-        longUrlInput.focus();
-    }
+    // Auto-focus
+    if (longUrlInput) longUrlInput.focus();
     
-    // ============================================
-    // PASTE FUNCTIONALITY
-    // ============================================
+    // Paste functionality
     if (pasteBtn) {
-        pasteBtn.addEventListener('click', async () => {
+        pasteBtn.addEventListener('click', async function() {
             try {
                 const text = await navigator.clipboard.readText();
                 longUrlInput.value = text;
                 longUrlInput.focus();
-                // Auto-shorten after paste
-                setTimeout(() => {
+                setTimeout(function() {
                     if (longUrlInput.value.trim()) {
                         shortenBtn.click();
                     }
                 }, 300);
-                showToast('📋 Pasted from clipboard');
+                showToast('Pasted from clipboard');
             } catch {
-                showToast('Unable to read clipboard. Please paste manually.', 'error');
+                showToast('Unable to read clipboard', 'error');
             }
         });
     }
     
-    // ============================================
-    // ENTER KEY SHORTCUT
-    // ============================================
-    longUrlInput.addEventListener('keydown', (e) => {
+    // Enter key shortcut
+    longUrlInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             if (longUrlInput.value.trim()) {
@@ -69,9 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // ============================================
-    // AUTO-PREFIX URL ON BLUR
-    // ============================================
+    // Auto-prefix URL
     longUrlInput.addEventListener('blur', function() {
         let url = this.value.trim();
         if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
@@ -79,22 +74,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // ============================================
-    // SHORTEN FUNCTION
-    // ============================================
+    // Bulk toggle
+    if (bulkToggleBtn) {
+        bulkToggleBtn.addEventListener('click', function() {
+            if (bulkArea.classList.contains('hidden')) {
+                bulkArea.classList.remove('hidden');
+                this.innerHTML = '<i class="fas fa-times"></i> Hide Bulk';
+            } else {
+                bulkArea.classList.add('hidden');
+                this.innerHTML = '<i class="fas fa-layer-group"></i> Bulk Shorten';
+            }
+        });
+    }
+    
+    // Shorten function
     async function shortenUrl() {
         const url = longUrlInput.value.trim();
         const customCode = customCodeInput.value.trim();
         const expiresIn = expiresInSelect.value;
         
-        // Validate
         if (!url) {
             showToast('Please enter a URL', 'error');
             longUrlInput.focus();
             return;
         }
         
-        // Show loading
         shortenBtn.disabled = true;
         shortenBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Shortening...';
         
@@ -113,32 +117,34 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.success) {
                 currentShortUrl = data.short_url;
+                currentShortCode = data.short_code || data.short_url.split('/').pop();
                 shortenedUrlInput.value = data.short_url;
                 resultSection.classList.remove('hidden');
                 
-                // Generate QR Code
                 generateQRCode(data.short_url);
                 
-                // Auto-copy to clipboard
                 try {
                     await navigator.clipboard.writeText(data.short_url);
-                    showToast('✅ Copied to clipboard!');
+                    showToast('Copied to clipboard!');
                 } catch {
-                    showToast('✨ Link created!');
+                    showToast('Link created!');
                 }
                 
-                // Scroll to result
-                setTimeout(() => {
+                setTimeout(function() {
                     resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 300);
                 
-                // Update stats button
                 if (statsBtn) {
-                    const code = data.short_code || data.short_url.split('/').pop();
-                    statsBtn.onclick = () => {
-                        window.location.href = `/${code}+`;
-                    };
                     statsBtn.style.display = 'inline-flex';
+                    statsBtn.onclick = function() {
+                        window.location.href = '/' + currentShortCode + '+';
+                    };
+                }
+                
+                if (previewBtn) {
+                    previewBtn.onclick = function() {
+                        showPreview(currentShortUrl);
+                    };
                 }
                 
             } else {
@@ -152,36 +158,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // ============================================
-    // SHORTEN BUTTON
-    // ============================================
     if (shortenBtn) {
         shortenBtn.addEventListener('click', shortenUrl);
     }
     
-    // ============================================
-    // COPY FUNCTION
-    // ============================================
+    // Bulk shorten
+    if (bulkShortenBtn) {
+        bulkShortenBtn.addEventListener('click', async function() {
+            const text = bulkUrls.value;
+            const urls = text.split(/[\n,]+/).map(function(u) { return u.trim(); }).filter(function(u) { return u; });
+            
+            if (urls.length === 0) {
+                showToast('Please enter at least one URL', 'error');
+                return;
+            }
+            if (urls.length > 20) {
+                showToast('Maximum 20 URLs at a time', 'error');
+                return;
+            }
+            
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            bulkResults.innerHTML = '';
+            
+            const results = [];
+            for (const url of urls) {
+                try {
+                    const res = await fetch('/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: url })
+                    });
+                    const data = await res.json();
+                    results.push({
+                        original: url,
+                        short: data.short_url || 'Failed',
+                        success: data.success || false
+                    });
+                } catch {
+                    results.push({
+                        original: url,
+                        short: 'Error',
+                        success: false
+                    });
+                }
+            }
+            
+            bulkResults.innerHTML = results.map(function(r) {
+                var statusIcon = r.success ? 
+                    '<span class="status-icon success"><i class="fas fa-check-circle"></i></span>' : 
+                    '<span class="status-icon error"><i class="fas fa-times-circle"></i></span>';
+                return '<div class="bulk-item">' +
+                    statusIcon +
+                    '<span class="original">' + escapeHtml(r.original) + '</span>' +
+                    '<span class="short">' + escapeHtml(r.short) + '</span>' +
+                    (r.success ? '<button class="btn-copy-mini" onclick="copyText(\'' + escapeHtml(r.short) + '\')"><i class="fas fa-copy"></i></button>' : '') +
+                    '</div>';
+            }).join('');
+            
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-bolt"></i> Shorten All';
+            showToast(results.filter(function(r) { return r.success; }).length + ' links shortened');
+        });
+    }
+    
+    // Copy function
     async function copyLink() {
         const url = shortenedUrlInput.value;
         if (!url) return;
         
         try {
             await navigator.clipboard.writeText(url);
-            showToast('✅ Copied to clipboard!');
-            
-            // Visual feedback
+            showToast('Copied to clipboard!');
             copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            copyBtn.style.borderColor = 'var(--success)';
-            setTimeout(() => {
+            setTimeout(function() {
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                copyBtn.style.borderColor = '';
             }, 2000);
         } catch {
-            // Fallback
             shortenedUrlInput.select();
             document.execCommand('copy');
-            showToast('✅ Copied!');
+            showToast('Copied!');
         }
     }
     
@@ -189,9 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.addEventListener('click', copyLink);
     }
     
-    // ============================================
-    // SHARE FUNCTION
-    // ============================================
+    // Share function
     function shareLink() {
         const url = shortenedUrlInput.value;
         if (!url) return;
@@ -201,10 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 title: 'wafyurl - Short Link',
                 text: 'Check out this link:',
                 url: url
-            }).catch(() => {});
+            }).catch(function() {});
         } else {
             copyLink();
-            showToast('📋 Link copied to share!');
+            showToast('Link copied to share');
         }
     }
     
@@ -212,31 +266,25 @@ document.addEventListener('DOMContentLoaded', () => {
         shareBtn.addEventListener('click', shareLink);
     }
     
-    // ============================================
-    // QR CODE TOGGLE
-    // ============================================
+    // QR toggle
     if (qrToggleBtn) {
-        qrToggleBtn.addEventListener('click', () => {
+        qrToggleBtn.addEventListener('click', function() {
             if (qrSection.classList.contains('hidden')) {
                 qrSection.classList.remove('hidden');
-                qrToggleBtn.innerHTML = '<i class="fas fa-times"></i> Hide QR';
+                this.innerHTML = '<i class="fas fa-times"></i> Hide QR';
                 if (!qrCodeInstance && currentShortUrl) {
                     generateQRCode(currentShortUrl);
                 }
             } else {
                 qrSection.classList.add('hidden');
-                qrToggleBtn.innerHTML = '<i class="fas fa-qrcode"></i> QR Code';
+                this.innerHTML = '<i class="fas fa-qrcode"></i> QR Code';
             }
         });
     }
     
-    // ============================================
-    // QR CODE GENERATION
-    // ============================================
+    // QR generation
     function generateQRCode(url) {
         if (!qrContainer) return;
-        
-        // Clear old QR
         qrContainer.innerHTML = '';
         
         try {
@@ -249,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 correctLevel: QRCode.CorrectLevel.H
             });
             
-            // Show download button
             if (downloadQrBtn) {
                 downloadQrBtn.style.display = 'inline-flex';
                 downloadQrBtn.onclick = downloadQR;
@@ -259,9 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // ============================================
-    // DOWNLOAD QR CODE
-    // ============================================
     function downloadQR() {
         const canvas = qrContainer.querySelector('canvas');
         const img = qrContainer.querySelector('img');
@@ -281,10 +325,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // ============================================
-    // TOAST NOTIFICATION
-    // ============================================
-    function showToast(message, type = 'success') {
+    // Preview
+    async function showPreview(shortUrl) {
+        if (!previewModal) return;
+        
+        previewModal.classList.remove('hidden');
+        previewTitle.textContent = 'Loading preview...';
+        previewDesc.textContent = '';
+        previewImage.src = '';
+        
+        try {
+            const code = shortUrl.split('/').pop();
+            const linkRes = await fetch('/api/link/' + code);
+            const linkData = await linkRes.json();
+            
+            if (!linkData.original_url) {
+                throw new Error('No URL found');
+            }
+            
+            const previewRes = await fetch('/api/preview?url=' + encodeURIComponent(linkData.original_url));
+            const previewData = await previewRes.json();
+            
+            previewTitle.textContent = previewData.title || 'No title available';
+            previewDesc.textContent = previewData.description || 'No description available';
+            if (previewData.image) {
+                previewImage.src = previewData.image;
+                previewImage.style.display = 'block';
+            } else {
+                previewImage.style.display = 'none';
+            }
+        } catch (err) {
+            previewTitle.textContent = 'Preview not available';
+            previewDesc.textContent = 'Could not fetch link preview. The website may not support previews.';
+            previewImage.style.display = 'none';
+        }
+    }
+    
+    window.closePreview = function() {
+        if (previewModal) {
+            previewModal.classList.add('hidden');
+        }
+    };
+    
+    // Close modal on backdrop click
+    if (previewModal) {
+        previewModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreview();
+            }
+        });
+    }
+    
+    // Toast function
+    function showToast(message, type) {
+        type = type || 'success';
         if (!toast || !toastMessage) return;
         
         toastMessage.textContent = message;
@@ -303,15 +397,43 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.classList.add('show');
         
         clearTimeout(toast._timeout);
-        toast._timeout = setTimeout(() => {
+        toast._timeout = setTimeout(function() {
             toast.classList.remove('show');
         }, 3000);
     }
     
-    // ============================================
-    // KEYBOARD SHORTCUT: Ctrl+K for focus
-    // ============================================
-    document.addEventListener('keydown', (e) => {
+    // Utility: escape HTML
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Utility: copy text
+    window.copyText = function(text) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied!');
+            }).catch(function() {
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
+    };
+    
+    function fallbackCopy(text) {
+        var input = document.createElement('input');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Copied!');
+    }
+    
+    // Keyboard shortcuts: Ctrl+K for focus
+    document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
             if (longUrlInput) {
@@ -321,43 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // ============================================
-    // HISTORY (localStorage)
-    // ============================================
-    function saveToHistory(shortUrl, longUrl) {
-        try {
-            let history = JSON.parse(localStorage.getItem('wafyurl_history') || '[]');
-            const entry = {
-                short: shortUrl,
-                long: longUrl,
-                time: new Date().toISOString()
-            };
-            history = [entry, ...history.filter(h => h.short !== shortUrl)];
-            history = history.slice(0, 10);
-            localStorage.setItem('wafyurl_history', JSON.stringify(history));
-        } catch {}
-    }
-    
-    // Save after shortening
-    const originalShorten = shortenUrl;
-    shortenUrl = async function() {
-        await originalShorten.call(this);
-        if (currentShortUrl && longUrlInput.value) {
-            saveToHistory(currentShortUrl, longUrlInput.value);
-        }
-    };
-    
-    // ============================================
-    // EXPOSE GLOBALLY
-    // ============================================
-    window.wafyurl = {
-        shorten: shortenUrl,
-        copy: copyLink,
-        share: shareLink,
-        showToast: showToast,
-        generateQR: generateQRCode
-    };
-    
-    console.log('🚀 wafyurl loaded successfully!');
-    console.log('📌 Press Ctrl+K to focus the URL input');
+    console.log('wafyurl loaded successfully!');
+    console.log('Press Ctrl+K to focus the URL input');
 });
