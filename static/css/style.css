@@ -264,7 +264,7 @@ header {
 }
 
 /* ============================================
-   INPUT OPTIONS
+   INPUT OPTIONS (Custom Code → Password → Expires)
    ============================================ */
 
 .input-options {
@@ -291,10 +291,6 @@ header {
 .option-group label i {
     color: var(--neon-blue);
     font-size: 0.75rem;
-}
-
-.option-group.full-width {
-    grid-column: 1 / -1;
 }
 
 .custom-code-wrapper {
@@ -336,35 +332,6 @@ header {
 #customCode::placeholder {
     color: var(--text-dim);
     font-size: 0.8rem;
-}
-
-select {
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-family: inherit;
-    outline: none;
-    cursor: pointer;
-    transition: var(--transition);
-    min-height: 44px;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
-}
-
-select:focus {
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 12px var(--neon-glow);
-}
-
-select option {
-    background: var(--bg-card);
-    color: var(--text-primary);
 }
 
 /* ============================================
@@ -420,6 +387,39 @@ select option {
 
 .btn-toggle-password:hover {
     color: var(--neon-blue);
+}
+
+/* ============================================
+   SELECT (Expires)
+   ============================================ */
+
+select {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition);
+    min-height: 44px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+select:focus {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 12px var(--neon-glow);
+}
+
+select option {
+    background: var(--bg-card);
+    color: var(--text-primary);
 }
 
 /* ============================================
@@ -1185,14 +1185,6 @@ footer {
 
     .input-options {
         grid-template-columns: 1fr;
-    }
-
-    .input-options .option-group:last-child {
-        max-width: 200px;
-    }
-
-    .option-group.full-width {
-        grid-column: 1;
     }
 
     .logo {
