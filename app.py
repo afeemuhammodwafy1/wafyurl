@@ -3,7 +3,7 @@ import string
 import random
 import re
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, jsonify, abort, session, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, jsonify, abort, session, url_for, send_from_directory, Response
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 import hashlib
@@ -163,7 +163,7 @@ def extract_referer_domain(referer):
         if not domain:
             return 'Direct'
         return domain
-    except:
+    except Exception:
         return 'Direct'
 
 def update_site_stats(link_added=False):
@@ -186,7 +186,7 @@ def get_geo_location(ip):
                 'country': data.get('country', 'Unknown'),
                 'city': data.get('city', 'Unknown')
             }
-    except:
+    except Exception:
         pass
     return {'country': 'Unknown', 'city': 'Unknown'}
 
@@ -218,7 +218,35 @@ def serve_og_image():
     return send_from_directory(app.root_path, 'og-image.webp', mimetype='image/webp')
 
 # ============================================
-# ROUTES
+# SEO: ROBOTS.TXT & SITEMAP.XML
+# ============================================
+@app.route('/robots.txt')
+def robots():
+    robots_content = "User-agent: *\nAllow: /\n\nSitemap: https://url.amwafy.xyz/sitemap.xml\n"
+    return Response(robots_content, mimetype='text/plain')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    urls = URL.query.filter_by(is_active=True).all()
+    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    sitemap_xml += '  <url>\n'
+    sitemap_xml += '    <loc>https://url.amwafy.xyz/</loc>\n'
+    sitemap_xml += '    <changefreq>daily</changefreq>\n'
+    sitemap_xml += '    <priority>1.0</priority>\n'
+    sitemap_xml += '  </url>\n'
+    for url_entry in urls:
+        sitemap_xml += '  <url>\n'
+        sitemap_xml += f'    <loc>https://url.amwafy.xyz/{url_entry.short_code}</loc>\n'
+        sitemap_xml += f'    <lastmod>{url_entry.created_at.date().isoformat()}</lastmod>\n'
+        sitemap_xml += '    <changefreq>monthly</changefreq>\n'
+        sitemap_xml += '    <priority>0.5</priority>\n'
+        sitemap_xml += '  </url>\n'
+    sitemap_xml += '</urlset>'
+    return Response(sitemap_xml, mimetype='application/xml')
+
+# ============================================
+# CORE APP ROUTES
 # ============================================
 @app.route('/')
 def index():
@@ -498,33 +526,6 @@ def get_link_info(code):
         'expires_at': url_entry.expires_at.isoformat() if url_entry.expires_at else None,
         'has_password': bool(url_entry.password_hash)
     })
-
-@app.route('/sitemap.xml')
-def sitemap():
-    urls = URL.query.filter_by(is_active=True).all()
-    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    sitemap_xml += '  <url>\n'
-    sitemap_xml += '    <loc>https://url.amwafy.xyz/</loc>\n'
-    sitemap_xml += '    <changefreq>daily</changefreq>\n'
-    sitemap_xml += '    <priority>1.0</priority>\n'
-    sitemap_xml += '  </url>\n'
-    for url_entry in urls:
-        sitemap_xml += '  <url>\n'
-        sitemap_xml += f'    <loc>https://url.amwafy.xyz/{url_entry.short_code}</loc>\n'
-        sitemap_xml += f'    <lastmod>{url_entry.created_at.date().isoformat()}</lastmod>\n'
-        sitemap_xml += '    <changefreq>monthly</changefreq>\n'
-        sitemap_xml += '    <priority>0.5</priority>\n'
-        sitemap_xml += '  </url>\n'
-    sitemap_xml += '</urlset>'
-    return sitemap_xml, 200, {'Content-Type': 'application/xml'}
-
-@app.route('/robots.txt')
-def robots():
-    return """User-agent: *
-Allow: /
-Sitemap: https://url.amwafy.xyz/sitemap.xml
-""", 200, {'Content-Type': 'text/plain'}
 
 # ============================================
 # ERROR HANDLERS
