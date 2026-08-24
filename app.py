@@ -3,7 +3,7 @@ import string
 import random
 import re
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, jsonify, abort, session, url_for
+from flask import Flask, render_template, request, redirect, jsonify, abort, session, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 import hashlib
@@ -176,7 +176,6 @@ def update_site_stats(link_added=False):
         db.session.commit()
 
 def get_geo_location(ip):
-    """Get country and city from IP using ip-api.com"""
     if ip in ['127.0.0.1', 'localhost']:
         return {'country': 'Local', 'city': 'Local'}
     try:
@@ -207,21 +206,25 @@ def check_rate_limit(ip, limit=50, window=3600):
     return True
 
 # ============================================
+# STATIC ICON, FAVICON & OG-IMAGE ROUTES
+# ============================================
+@app.route('/icon.webp')
+@app.route('/favicon.ico')
+def serve_icon():
+    return send_from_directory(app.root_path, 'icon.webp', mimetype='image/webp')
+
+@app.route('/og-image.webp')
+def serve_og_image():
+    return send_from_directory(app.root_path, 'og-image.webp', mimetype='image/webp')
+
+# ============================================
 # ROUTES
 # ============================================
-
 @app.route('/')
 def index():
     stats = SiteStats.query.first()
     total_links = stats.total_links if stats else 0
-    
-    meta_data = {
-        'title': 'wafyurl - Premium URL Shortener',
-        'description': 'Shorten your long URLs with wafyurl. Fast, secure, with analytics and bulk shortening.',
-        'canonical': request.url
-    }
-    
-    return render_template('index.html', meta=meta_data, total_links=total_links)
+    return render_template('index.html', total_links=total_links)
 
 @app.route('/shorten', methods=['POST'])
 def shorten():
@@ -295,7 +298,7 @@ def shorten():
         db.session.add(new_url)
         db.session.commit()
         update_site_stats(link_added=True)
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         return jsonify({'error': 'Server error. Please try again.'}), 500
     
@@ -309,9 +312,6 @@ def shorten():
         'has_password': bool(password)
     })
 
-# ============================================
-# ✅ NEW: PASSWORD VERIFICATION ROUTE
-# ============================================
 @app.route('/verify-password', methods=['POST'])
 def verify_password():
     data = request.get_json()
@@ -321,20 +321,16 @@ def verify_password():
     if not code or not password:
         return jsonify({'error': 'Code and password are required'}), 400
     
-    # Find the URL
     url_entry = URL.query.filter_by(short_code=code, is_active=True).first()
     if not url_entry:
         url_entry = URL.query.filter_by(custom_code=code, is_active=True).first()
         if not url_entry:
             return jsonify({'error': 'Link not found'}), 404
     
-    # Check if password protected
     if not url_entry.password_hash:
         return jsonify({'error': 'This link is not password protected'}), 400
     
-    # Verify password
     if hashlib.sha256(password.encode()).hexdigest() == url_entry.password_hash:
-        # Log the click (optional, but good for analytics)
         try:
             click = ClickLog(
                 url_id=url_entry.id,
@@ -349,7 +345,7 @@ def verify_password():
             url_entry.clicks += 1
             db.session.commit()
             update_site_stats()
-        except:
+        except Exception:
             db.session.rollback()
         
         return jsonify({
@@ -381,7 +377,6 @@ def redirect_to_url(code_str):
         db.session.commit()
         abort(410)
     
-    # ✅ Check for password
     if url_entry.password_hash:
         return render_template('password.html', code=code_str)
     
@@ -407,7 +402,7 @@ def redirect_to_url(code_str):
         url_entry.clicks += 1
         db.session.commit()
         update_site_stats()
-    except:
+    except Exception:
         db.session.rollback()
     
     return redirect(url_entry.original_url)
@@ -510,13 +505,13 @@ def sitemap():
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     sitemap_xml += '  <url>\n'
-    sitemap_xml += f'    <loc>{request.host_url}</loc>\n'
+    sitemap_xml += '    <loc>https://url.amwafy.xyz/</loc>\n'
     sitemap_xml += '    <changefreq>daily</changefreq>\n'
     sitemap_xml += '    <priority>1.0</priority>\n'
     sitemap_xml += '  </url>\n'
     for url_entry in urls:
         sitemap_xml += '  <url>\n'
-        sitemap_xml += f'    <loc>{request.host_url}{url_entry.short_code}</loc>\n'
+        sitemap_xml += f'    <loc>https://url.amwafy.xyz/{url_entry.short_code}</loc>\n'
         sitemap_xml += f'    <lastmod>{url_entry.created_at.date().isoformat()}</lastmod>\n'
         sitemap_xml += '    <changefreq>monthly</changefreq>\n'
         sitemap_xml += '    <priority>0.5</priority>\n'
@@ -526,9 +521,9 @@ def sitemap():
 
 @app.route('/robots.txt')
 def robots():
-    return f"""User-agent: *
+    return """User-agent: *
 Allow: /
-Sitemap: {request.host_url}sitemap.xml
+Sitemap: https://url.amwafy.xyz/sitemap.xml
 """, 200, {'Content-Type': 'text/plain'}
 
 # ============================================
@@ -557,7 +552,7 @@ def server_error(e):
 def inject_globals():
     stats = SiteStats.query.first()
     return {
-        'site_name': 'wafyurl',
+        'site_name': 'WafyURL',
         'total_links': stats.total_links if stats else 0,
         'total_clicks': stats.total_clicks if stats else 0
     }
