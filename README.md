@@ -1,7 +1,5 @@
 # WafyURL 🔗 — Premium Link Management Platform
 
-<div align="center">
-  <img src="https://url.amwafy.xyz/og-image.webp" alt="WafyURL Preview" width="100%" />
 </div>
 
 <br/>
