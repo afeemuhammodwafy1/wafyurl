@@ -3,42 +3,37 @@ import string
 import random
 import re
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, jsonify, abort, session, url_for, send_from_directory, Response
+from flask import Flask, render_template, request, redirect, jsonify, abort, Response, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from functools import wraps
+from sqlalchemy.pool import NullPool
 import hashlib
-import json
-import requests
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from collections import Counter
+import requests
+from bs4 import BeautifulSoup
 
-# ============================================
-# APP INITIALIZATION
-# ============================================
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# ============================================
-# DATABASE CONFIGURATION
-# ============================================
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///wafyurl.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 10,
-    'pool_recycle': 300,
-    'pool_pre_ping': True,
-}
+
+if database_url.startswith('postgresql'):
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'poolclass': NullPool,
+        'pool_pre_ping': True,
+    }
+else:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+    }
 
 db = SQLAlchemy(app)
 
-# ============================================
-# DATABASE MODELS
-# ============================================
 class URL(db.Model):
     __tablename__ = 'urls'
     
@@ -81,19 +76,6 @@ class SiteStats(db.Model):
     total_clicks = db.Column(db.Integer, default=0)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# ============================================
-# CREATE TABLES
-# ============================================
-with app.app_context():
-    db.create_all()
-    if SiteStats.query.first() is None:
-        stats = SiteStats()
-        db.session.add(stats)
-        db.session.commit()
-
-# ============================================
-# HELPER FUNCTIONS
-# ============================================
 def generate_short_code(length=6):
     chars = string.ascii_letters + string.digits
     while True:
@@ -119,9 +101,9 @@ def get_client_ip():
 
 def detect_device(user_agent):
     ua = user_agent.lower() if user_agent else ''
-    if 'mobile' in ua or 'android' in ua or 'iphone' in ua or 'ipod' in ua:
+    if any(x in ua for x in ['mobile', 'android', 'iphone', 'ipod']):
         return 'mobile'
-    elif 'tablet' in ua or 'ipad' in ua:
+    elif any(x in ua for x in ['tablet', 'ipad']):
         return 'tablet'
     return 'desktop'
 
@@ -149,7 +131,7 @@ def detect_os(user_agent):
         return 'Linux'
     elif 'android' in ua:
         return 'Android'
-    elif 'ios' in ua or 'iphone' in ua or 'ipad' in ua:
+    elif any(x in ua for x in ['ios', 'iphone', 'ipad']):
         return 'iOS'
     return 'Other'
 
@@ -160,54 +142,31 @@ def extract_referer_domain(referer):
         parsed = urlparse(referer)
         domain = parsed.netloc or parsed.path
         domain = domain.replace('www.', '')
-        if not domain:
-            return 'Direct'
-        return domain
+        return domain if domain else 'Direct'
     except Exception:
         return 'Direct'
 
-def update_site_stats(link_added=False):
-    stats = SiteStats.query.first()
-    if stats:
-        if link_added:
-            stats.total_links += 1
-        stats.total_clicks = URL.query.with_entities(db.func.sum(URL.clicks)).scalar() or 0
-        stats.updated_at = datetime.utcnow()
-        db.session.commit()
-
-def get_geo_location(ip):
-    if ip in ['127.0.0.1', 'localhost']:
-        return {'country': 'Local', 'city': 'Local'}
+def update_site_stats(link_added=False, click_added=False):
     try:
-        response = requests.get(f'http://ip-api.com/json/{ip}', timeout=3)
-        data = response.json()
-        if data.get('status') == 'success':
-            return {
-                'country': data.get('country', 'Unknown'),
-                'city': data.get('city', 'Unknown')
-            }
+        stats = SiteStats.query.first()
+        if stats:
+            if link_added:
+                stats.total_links += 1
+            if click_added:
+                stats.total_clicks += 1
+            stats.updated_at = datetime.utcnow()
+            db.session.commit()
     except Exception:
-        pass
-    return {'country': 'Unknown', 'city': 'Unknown'}
+        db.session.rollback()
 
-# ============================================
-# RATE LIMITING
-# ============================================
-rate_limit_store = {}
+def get_geo_location_fast():
+    country = request.headers.get('x-vercel-ip-country', 'Unknown')
+    city = request.headers.get('x-vercel-ip-city', 'Unknown')
+    return {
+        'country': country if country else 'Unknown',
+        'city': city if city else 'Unknown'
+    }
 
-def check_rate_limit(ip, limit=50, window=3600):
-    now = datetime.utcnow().timestamp()
-    if ip not in rate_limit_store:
-        rate_limit_store[ip] = []
-    rate_limit_store[ip] = [t for t in rate_limit_store[ip] if now - t < window]
-    if len(rate_limit_store[ip]) >= limit:
-        return False
-    rate_limit_store[ip].append(now)
-    return True
-
-# ============================================
-# STATIC ICON, FAVICON & OG-IMAGE ROUTES
-# ============================================
 @app.route('/icon.webp')
 @app.route('/favicon.ico')
 def serve_icon():
@@ -217,9 +176,6 @@ def serve_icon():
 def serve_og_image():
     return send_from_directory(app.root_path, 'og-image.webp', mimetype='image/webp')
 
-# ============================================
-# SEO: ROBOTS.TXT & SITEMAP.XML
-# ============================================
 @app.route('/robots.txt')
 def robots():
     robots_content = "User-agent: *\nAllow: /\n\nSitemap: https://url.amwafy.xyz/sitemap.xml\n"
@@ -227,14 +183,10 @@ def robots():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    urls = URL.query.filter_by(is_active=True).all()
+    urls = URL.query.filter_by(is_active=True).limit(500).all()
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    sitemap_xml += '  <url>\n'
-    sitemap_xml += '    <loc>https://url.amwafy.xyz/</loc>\n'
-    sitemap_xml += '    <changefreq>daily</changefreq>\n'
-    sitemap_xml += '    <priority>1.0</priority>\n'
-    sitemap_xml += '  </url>\n'
+    sitemap_xml += '  <url>\n    <loc>https://url.amwafy.xyz/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n'
     for url_entry in urls:
         sitemap_xml += '  <url>\n'
         sitemap_xml += f'    <loc>https://url.amwafy.xyz/{url_entry.short_code}</loc>\n'
@@ -245,9 +197,6 @@ def sitemap():
     sitemap_xml += '</urlset>'
     return Response(sitemap_xml, mimetype='application/xml')
 
-# ============================================
-# CORE APP ROUTES
-# ============================================
 @app.route('/')
 def index():
     stats = SiteStats.query.first()
@@ -257,10 +206,6 @@ def index():
 @app.route('/shorten', methods=['POST'])
 def shorten():
     ip = get_client_ip()
-    
-    if not check_rate_limit(ip):
-        return jsonify({'error': 'Too many requests. Please wait.'}), 429
-    
     data = request.get_json() if request.is_json else request.form
     long_url = data.get('url', '').strip()
     custom_code = data.get('custom_code', '').strip()
@@ -308,9 +253,7 @@ def shorten():
     elif expires_in == '30d':
         expires_at = datetime.utcnow() + timedelta(days=30)
     
-    password_hash = None
-    if password:
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
+    password_hash = hashlib.sha256(password.encode()).hexdigest() if password else None
     
     new_url = URL(
         original_url=long_url,
@@ -342,44 +285,43 @@ def shorten():
 
 @app.route('/verify-password', methods=['POST'])
 def verify_password():
-    data = request.get_json()
+    data = request.get_json() or {}
     code = data.get('code', '').strip()
     password = data.get('password', '').strip()
     
     if not code or not password:
         return jsonify({'error': 'Code and password are required'}), 400
     
-    url_entry = URL.query.filter_by(short_code=code, is_active=True).first()
+    url_entry = URL.query.filter((URL.short_code == code) | (URL.custom_code == code), URL.is_active.is_(True)).first()
     if not url_entry:
-        url_entry = URL.query.filter_by(custom_code=code, is_active=True).first()
-        if not url_entry:
-            return jsonify({'error': 'Link not found'}), 404
+        return jsonify({'error': 'Link not found'}), 404
     
     if not url_entry.password_hash:
         return jsonify({'error': 'This link is not password protected'}), 400
     
     if hashlib.sha256(password.encode()).hexdigest() == url_entry.password_hash:
         try:
+            ua = request.headers.get('User-Agent', '')
+            geo = get_geo_location_fast()
             click = ClickLog(
                 url_id=url_entry.id,
                 ip_address=get_client_ip(),
-                user_agent=request.headers.get('User-Agent', ''),
+                user_agent=ua,
                 referer=request.headers.get('Referer', ''),
-                device_type=detect_device(request.headers.get('User-Agent', '')),
-                browser=detect_browser(request.headers.get('User-Agent', '')),
-                os=detect_os(request.headers.get('User-Agent', ''))
+                device_type=detect_device(ua),
+                browser=detect_browser(ua),
+                os=detect_os(ua),
+                country=geo['country'],
+                city=geo['city']
             )
             db.session.add(click)
             url_entry.clicks += 1
             db.session.commit()
-            update_site_stats()
+            update_site_stats(click_added=True)
         except Exception:
             db.session.rollback()
         
-        return jsonify({
-            'success': True,
-            'url': url_entry.original_url
-        })
+        return jsonify({'success': True, 'url': url_entry.original_url})
     
     return jsonify({'error': 'Incorrect password'}), 401
 
@@ -387,18 +329,14 @@ def verify_password():
 def redirect_to_url(code_str):
     if code_str.endswith('+'):
         actual_code = code_str[:-1]
-        url_entry = URL.query.filter_by(short_code=actual_code, is_active=True).first()
-        if not url_entry:
-            url_entry = URL.query.filter_by(custom_code=actual_code, is_active=True).first()
+        url_entry = URL.query.filter((URL.short_code == actual_code) | (URL.custom_code == actual_code), URL.is_active.is_(True)).first()
         if not url_entry:
             abort(404)
         return render_template('index.html', stats=url_entry)
     
-    url_entry = URL.query.filter_by(short_code=code_str, is_active=True).first()
+    url_entry = URL.query.filter((URL.short_code == code_str) | (URL.custom_code == code_str), URL.is_active.is_(True)).first()
     if not url_entry:
-        url_entry = URL.query.filter_by(custom_code=code_str, is_active=True).first()
-        if not url_entry:
-            abort(404)
+        abort(404)
     
     if url_entry.expires_at and url_entry.expires_at < datetime.utcnow():
         url_entry.is_active = False
@@ -409,27 +347,26 @@ def redirect_to_url(code_str):
         return render_template('password.html', code=code_str)
     
     try:
-        ip = get_client_ip()
-        geo = get_geo_location(ip)
+        ua = request.headers.get('User-Agent', '')
         referer = request.headers.get('Referer', '')
-        referer_domain = extract_referer_domain(referer)
+        geo = get_geo_location_fast()
         
         click = ClickLog(
             url_id=url_entry.id,
-            ip_address=ip,
-            user_agent=request.headers.get('User-Agent', ''),
+            ip_address=get_client_ip(),
+            user_agent=ua,
             referer=referer[:1000] if referer else None,
-            referer_domain=referer_domain,
-            country=geo.get('country'),
-            city=geo.get('city'),
-            device_type=detect_device(request.headers.get('User-Agent', '')),
-            browser=detect_browser(request.headers.get('User-Agent', '')),
-            os=detect_os(request.headers.get('User-Agent', ''))
+            referer_domain=extract_referer_domain(referer),
+            country=geo['country'],
+            city=geo['city'],
+            device_type=detect_device(ua),
+            browser=detect_browser(ua),
+            os=detect_os(ua)
         )
         db.session.add(click)
         url_entry.clicks += 1
         db.session.commit()
-        update_site_stats()
+        update_site_stats(click_added=True)
     except Exception:
         db.session.rollback()
     
@@ -437,11 +374,9 @@ def redirect_to_url(code_str):
 
 @app.route('/api/stats/<code>')
 def get_stats(code):
-    url_entry = URL.query.filter_by(short_code=code).first()
+    url_entry = URL.query.filter((URL.short_code == code) | (URL.custom_code == code)).first()
     if not url_entry:
-        url_entry = URL.query.filter_by(custom_code=code).first()
-        if not url_entry:
-            return jsonify({'error': 'Link not found'}), 404
+        return jsonify({'error': 'Link not found'}), 404
     
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
     recent_clicks = ClickLog.query.filter(
@@ -449,21 +384,16 @@ def get_stats(code):
         ClickLog.clicked_at >= thirty_days_ago
     ).all()
     
-    daily_data = {}
-    for day in range(30):
-        date = (datetime.utcnow() - timedelta(days=day)).date()
-        daily_data[date.isoformat()] = 0
-    
+    daily_data = {(datetime.utcnow() - timedelta(days=day)).date().isoformat(): 0 for day in range(30)}
     referer_counts = Counter()
+    devices = {'mobile': 0, 'desktop': 0, 'tablet': 0}
+    
     for click in recent_clicks:
         date = click.clicked_at.date().isoformat()
         if date in daily_data:
             daily_data[date] += 1
         if click.referer_domain:
             referer_counts[click.referer_domain] += 1
-    
-    devices = {'mobile': 0, 'desktop': 0, 'tablet': 0}
-    for click in recent_clicks:
         if click.device_type:
             devices[click.device_type] = devices.get(click.device_type, 0) + 1
     
@@ -486,7 +416,7 @@ def get_preview():
         return jsonify({'error': 'URL required'}), 400
     
     try:
-        response = requests.get(url, timeout=5, headers={
+        response = requests.get(url, timeout=3, headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         })
         response.raise_for_status()
@@ -506,18 +436,14 @@ def get_preview():
             'description': desc[:300] if desc else 'No description available',
             'image': image if image else ''
         })
-    except requests.RequestException:
-        return jsonify({'error': 'Could not fetch preview'}), 400
     except Exception:
-        return jsonify({'error': 'Error parsing page'}), 400
+        return jsonify({'error': 'Could not fetch preview'}), 400
 
 @app.route('/api/link/<code>')
 def get_link_info(code):
-    url_entry = URL.query.filter_by(short_code=code, is_active=True).first()
+    url_entry = URL.query.filter((URL.short_code == code) | (URL.custom_code == code), URL.is_active.is_(True)).first()
     if not url_entry:
-        url_entry = URL.query.filter_by(custom_code=code, is_active=True).first()
-        if not url_entry:
-            return jsonify({'error': 'Link not found'}), 404
+        return jsonify({'error': 'Link not found'}), 404
     
     return jsonify({
         'original_url': url_entry.original_url,
@@ -527,9 +453,18 @@ def get_link_info(code):
         'has_password': bool(url_entry.password_hash)
     })
 
-# ============================================
-# ERROR HANDLERS
-# ============================================
+@app.context_processor
+def inject_globals():
+    try:
+        stats = SiteStats.query.first()
+        return {
+            'site_name': 'WafyURL',
+            'total_links': stats.total_links if stats else 0,
+            'total_clicks': stats.total_clicks if stats else 0
+        }
+    except Exception:
+        return {'site_name': 'WafyURL', 'total_links': 0, 'total_clicks': 0}
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template('index.html', error='Link not found.'), 404
@@ -538,30 +473,9 @@ def not_found(e):
 def gone(e):
     return render_template('index.html', error='This link has expired.'), 410
 
-@app.errorhandler(429)
-def rate_limit(e):
-    return jsonify({'error': 'Too many requests. Please wait.'}), 429
-
 @app.errorhandler(500)
 def server_error(e):
     return render_template('index.html', error='Server error. Please try again.'), 500
 
-# ============================================
-# CONTEXT PROCESSOR
-# ============================================
-@app.context_processor
-def inject_globals():
-    stats = SiteStats.query.first()
-    return {
-        'site_name': 'WafyURL',
-        'total_links': stats.total_links if stats else 0,
-        'total_clicks': stats.total_clicks if stats else 0
-    }
-
-# ============================================
-# START SERVER
-# ============================================
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    app.run(host='0.0.0.0', port=5000, debug=False)
