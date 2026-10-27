@@ -1,7 +1,6 @@
 import os
 from flask import Blueprint, abort, current_app, redirect, render_template, Response, send_from_directory
 from app.routes.seo_content import SEO_PAGES, SEO_CONTENT
-from app.models import SiteStats
 
 bp = Blueprint("pages", __name__)
 
@@ -47,24 +46,25 @@ def seo_page(page_path):
         abort(404)
     metadata = SEO_PAGES[path]
     content = SEO_CONTENT[path]
+    if path == '/faq':
+        return render_template('faq.html', path=path, metadata=metadata, content=content)
     return render_template('seo_page.html', path=path, metadata=metadata, content=content)
 
 
 @bp.route('/')
 def index():
-    stats = SiteStats.query.first()
-    total_links = stats.total_links if stats else 0
-    return render_template('index.html', total_links=total_links, shortener_page=False)
+    return render_template('index.html')
 
 
 @bp.route('/shorten')
 def shortener_page():
-    return render_template('index.html', total_links=0, shortener_page=True)
+    return redirect('/#shortener', code=301)
 
 
 
 def _render_seo_path(path):
-    return render_template("seo_page.html", path=path, metadata=SEO_PAGES[path], content=SEO_CONTENT[path])
+    template = "faq.html" if path == "/faq" else "seo_page.html"
+    return render_template(template, path=path, metadata=SEO_PAGES[path], content=SEO_CONTENT[path])
 
 for _seo_path in SEO_CONTENT:
     if _seo_path.count("/") == 1:

@@ -6,7 +6,7 @@
 
 **Shorten smarter. Share faster. Track everything.**
 
-WafyURL is a Flask-based URL shortener with custom aliases, optional password protection, expiring links, click analytics, QR-code support, bulk shortening, and destination-page previews.
+WafyURL is a Flask-based URL shortener with custom aliases, optional password protection, expiring links, click analytics, QR-code support, bulk shortening, and destination-page previews. The home page brings the primary shortener directly below a compact hero; bulk tools expand inside the shortener, while the FAQ lives on its own `/faq` page.
 
 **Live website:** https://url.amwafy.xyz  
 **Source code:** https://github.com/afeemuhammodwafy1/wafyurl
@@ -81,7 +81,7 @@ pip install -r requirements.txt
 
 Set a strong, unique `SECRET_KEY` before deploying. To use PostgreSQL, set `DATABASE_URL` to your database connection URL. If `DATABASE_URL` is omitted, the app uses a local SQLite database.
 
-Copy `.env.example` to `.env` and set values for your environment. Example:
+Create a local `.env` file and set values for your environment. Example:
 
 ```env
 SECRET_KEY=replace-with-a-long-random-secret
@@ -101,7 +101,7 @@ Open http://localhost:5000 in your browser.
 
 ## Deployment
 
-The repository includes `Procfile`, `render.yaml`, and `vercel.json` deployment configuration. Set `SECRET_KEY`, `DATABASE_URL`, and `PUBLIC_BASE_URL` in the host environment. Use a persistent PostgreSQL database such as Neon in production; local SQLite storage is not suitable for ephemeral serverless filesystems. The live deployment URL configured by default is:
+The repository includes a `Procfile` and `vercel.json` deployment configuration. Set `SECRET_KEY`, `DATABASE_URL`, and `PUBLIC_BASE_URL` in the host environment. Use a persistent PostgreSQL database such as Neon in production; local SQLite storage is not suitable for ephemeral serverless filesystems. The live deployment URL configured by default is:
 
 **https://url.amwafy.xyz**
 
@@ -122,31 +122,55 @@ The app currently creates missing tables at startup; `db.create_all()` does not 
 
 ```text
 wafyurl/
-├── docs/
-│   └── images/
-│       └── wafyurl-banner.webp
+├── api/
+│   └── index.py
+├── app/
+│   ├── models/
+│   │   └── __init__.py
+│   ├── routes/
+│   │   ├── api.py
+│   │   ├── links.py
+│   │   ├── pages.py
+│   │   └── seo_content.py
+│   ├── security/
+│   │   └── rate_limit.py
+│   ├── services/
+│   │   └── helpers.py
+│   ├── config.py
+│   ├── extensions.py
+│   └── __init__.py
+├── docs/images/wafyurl-banner.webp
 ├── static/
-│   ├── css/
-│   │   └── style.css
+│   ├── css/style.css
 │   └── js/
-│       ├── script.js
-│       └── analytics.js
+│       ├── analytics.js
+│       └── script.js
 ├── templates/
+│   ├── 404.html
+│   ├── faq.html
 │   ├── index.html
-│   ├── seo_page.html
 │   ├── password.html
-│   └── 404.html
+│   └── seo_page.html
+├── tests/test_app.py
 ├── app.py
-├── icon.webp
-├── og-image.webp
-├── .env.example
-├── .gitignore
 ├── CHANGELOG_REDESIGN.md
+├── icon.webp
+├── LICENSE
+├── og-image.webp
 ├── Procfile
-├── render.yaml
 ├── requirements.txt
 └── vercel.json
 ```
+
+## Home page and navigation
+
+- `/` contains the centered hero, the URL shortener, feature cards, and the how-it-works section.
+- `/#shortener` points directly to the shortener section. The bulk form is a collapsible panel inside that section.
+- `/shorten` is a legacy GET URL and redirects to `/#shortener`; the `POST /shorten` API remains the link-creation endpoint.
+- `/faq` is a dedicated FAQ page with expandable questions and FAQ structured data.
+- The homepage does not display a total-links-created counter.
+
+Run the smoke tests with `pytest` after installing the project dependencies.
 
 ## Contributing
 
@@ -176,7 +200,5 @@ app/
 ├── routes/               # page, link, and API blueprints
 ├── services/             # reusable URL and analytics helpers
 ├── security/             # request rate limiting
-└── utils/                # shared utility package
-migrations/               # database migration workspace
 tests/                    # automated test workspace
 ```

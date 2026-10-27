@@ -148,12 +148,12 @@ document.addEventListener('DOMContentLoaded', function() {
             bulkArea.classList.toggle('hidden', expanded);
             this.setAttribute('aria-expanded', String(!expanded));
             this.innerHTML = expanded
-                ? '<span><i class="fa-solid fa-layer-group"></i> Need to shorten multiple links?</span><span class="bulk-toggle-label">Bulk tools <i class="fa-solid fa-arrow-up-right-from-square"></i></span>'
+                ? '<span><i class="fa-solid fa-layer-group"></i> Need to shorten multiple links?</span><span class="bulk-toggle-label">Open bulk tools <i class="fa-solid fa-chevron-down"></i></span>'
                 : '<span><i class="fa-solid fa-xmark"></i> Hide bulk tools</span><span class="bulk-toggle-label">Close <i class="fa-solid fa-chevron-up"></i></span>';
         });
     }
     
-    if (pageParams.get('tool') === 'bulk' && bulkToggleBtn) bulkToggleBtn.click();
+    if (pageParams.get('tool') === 'bulk' && bulkToggleBtn && bulkArea) bulkToggleBtn.click();
 
     // ============================================
     // SHORTEN FUNCTION

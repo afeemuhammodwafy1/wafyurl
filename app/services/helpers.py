@@ -114,11 +114,9 @@ def extract_referer_domain(referer):
         return 'Direct'
 
 
-def update_site_stats(link_added=False):
+def update_site_stats():
     stats = SiteStats.query.first()
     if stats:
-        if link_added:
-            stats.total_links += 1
         stats.total_clicks = URL.query.with_entities(db.func.sum(URL.clicks)).scalar() or 0
         stats.updated_at = datetime.utcnow()
         db.session.commit()

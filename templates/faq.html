@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ metadata.title }}</title>
+  <meta name="description" content="{{ metadata.description }}">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://url.amwafy.xyz{{ path }}">
+  <link rel="icon" type="image/webp" href="/icon.webp">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WafyURL">
+  <meta property="og:title" content="{{ metadata.title }}">
+  <meta property="og:description" content="{{ metadata.description }}">
+  <meta property="og:url" content="https://url.amwafy.xyz{{ path }}">
+  <meta property="og:image" content="https://url.amwafy.xyz/og-image.webp">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for heading, answer in content.sections %}{"@type":"Question","name":{{ heading|tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ answer|tojson }}}}{{ "," if not loop.last }}{% endfor %}]}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="site-shell">
+    <nav class="top-nav" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="WafyURL home"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a>
+      <div class="nav-links"><a href="/#features">Features</a><a href="/link-analytics">Analytics</a><a href="/faq" aria-current="page">FAQ</a></div>
+      <a class="nav-cta" href="/#shortener">Shorten a link <i class="fa-solid fa-arrow-right"></i></a>
+    </nav>
+    <main class="faq-page page-width">
+      <a class="back-link" href="/"><i class="fa-solid fa-arrow-left"></i> Back to WafyURL</a>
+      <header class="faq-page-heading">
+        <div class="section-kicker"><span class="kicker-dot"></span> HELP CENTER</div>
+        <h1>Frequently asked <span>questions.</span></h1>
+        <p>{{ content.lead }}</p>
+      </header>
+      <section class="faq-page-list" aria-label="Frequently asked questions">
+        {% for heading, answer in content.sections %}
+        <details class="faq-page-item">
+          <summary><span>{{ heading }}</span><i class="fa-solid fa-plus" aria-hidden="true"></i></summary>
+          <div class="faq-answer"><p>{{ answer }}</p></div>
+        </details>
+        {% endfor %}
+      </section>
+      <section class="faq-contact-card">
+        <div class="faq-contact-icon"><i class="fa-regular fa-comment-dots"></i></div>
+        <div><h2>Still need a hand?</h2><p>Return to the shortener and try the available tools, or review the project information.</p></div>
+        <a class="button button-primary" href="/#shortener">Go to shortener <i class="fa-solid fa-arrow-right"></i></a>
+      </section>
+    </main>
+    <footer class="site-footer"><div class="footer-main"><a class="brand" href="/"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a><p>Make every link easier to share.</p><div class="footer-links"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/faq" aria-current="page">FAQ</a><a href="https://github.com/afeemuhammodwafy1" target="_blank" rel="noopener noreferrer">GitHub <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div></div><div class="footer-bottom"><span>© 2026 WafyURL</span><span>Built by Afee Muhammod Wafy</span></div></footer>
+  </div>
+</body>
+</html>

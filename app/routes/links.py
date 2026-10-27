@@ -96,7 +96,7 @@ def process_shorten_payload(data, ip):
     try:
         db.session.add(new_url)
         db.session.commit()
-        update_site_stats(link_added=True)
+        update_site_stats()
     except IntegrityError:
         db.session.rollback()
         current_app.logger.info('Short-code uniqueness conflict during creation')

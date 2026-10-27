@@ -44,3 +44,14 @@ Then connect the GitHub repository to Vercel, configure the custom domain and it
 - Existing historical click-log rows may still contain IP addresses written by older versions. Review retention and cleanup before making privacy commitments.
 - The application still uses `db.create_all()` at startup; it creates missing tables but does not migrate existing schema changes. Adopt a migration workflow before future model changes.
 - Server-side preview fetching is security-sensitive and should receive further integration testing before high-risk production use.
+
+## Home page and FAQ refresh
+
+- Moved the URL shortener into the home page directly below a compact, centered hero section.
+- Kept custom alias, password, expiration, QR, preview, copy, and bulk interactions wired to the existing controls and API endpoints.
+- Made bulk shortening a collapsible panel within the shortener and removed its top-navigation link.
+- Removed the “links created on WafyURL” counter and its homepage display.
+- Changed the legacy `GET /shorten` page to redirect to `/#shortener`; `POST /shorten` remains unchanged.
+- Added a dedicated `/faq` template with expandable answers and FAQ structured data.
+- Updated the README with the current homepage structure and routes.
+
