@@ -391,34 +391,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .section-kicker { color: var(--indigo); }
 .kicker-dot { background: var(--indigo); box-shadow: 0 0 0 4px var(--indigo-soft); }
 .hero-home {
-  grid-template-columns: minmax(0, 1fr) minmax(320px, .82fr);
-  gap: clamp(36px, 6vw, 78px);
-  align-items: center;
+  display: block;
   min-height: 0;
   padding-top: clamp(54px, 7vw, 88px);
-  padding-bottom: clamp(48px, 6vw, 72px);
+  padding-bottom: clamp(42px, 5vw, 64px);
+  text-align: center;
 }
-.hero-home .hero-copy { max-width: 620px; padding: 0; }
-.hero-home h1 { margin-top: 18px; font-size: clamp(42px, 5.4vw, 68px); }
-.hero-home .hero-description { max-width: 540px; }
-.hero-home .hero-proof { gap: 11px 18px; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 27px; }
+.hero-home .hero-copy { max-width: 850px; margin: 0 auto; padding: 0; }
+.hero-home .section-kicker { justify-content: center; }
+.hero-home h1 { max-width: 820px; margin: 18px auto 18px; font-size: clamp(42px, 5.4vw, 68px); }
+.hero-home .hero-description { max-width: 620px; margin: 0 auto; }
+.hero-home .hero-proof { justify-content: center; gap: 11px 18px; }
+.hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 27px; }
 .hero-actions .button { min-height: 46px; padding: 0 19px; }
-.hero-visual { position: relative; isolation: isolate; display: grid; place-items: center; min-height: 290px; padding: 24px; }
-.hero-visual-glow { position: absolute; z-index: -1; inset: 8% 2%; border-radius: 40%; background: radial-gradient(ellipse, rgba(92, 138, 105, .16), rgba(92, 138, 105, 0) 68%); filter: blur(5px); }
-.hero-link-card { width: min(100%, 430px); padding: 25px; border: 1px solid rgba(203, 211, 199, .9); border-radius: 22px; background: rgba(255, 255, 255, .9); box-shadow: 0 28px 70px rgba(35, 58, 42, .12); transform: rotate(-1.2deg); }
-.hero-visual-label { display: block; margin-bottom: 9px; color: #7d897f; font-size: 9px; font-weight: 800; letter-spacing: 1.4px; }
-.hero-long-link, .hero-short-link { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 13px 14px; border: 1px solid var(--border); border-radius: 11px; color: #66746a; background: #fbfcfa; font-size: 11px; }
-.hero-long-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hero-long-link > i { color: #8a988e; }
-.hero-link-arrow { display: grid; place-items: center; width: 30px; height: 30px; margin: 12px auto; border: 1px solid var(--border); border-radius: 50%; color: var(--indigo); background: white; font-size: 11px; }
-.hero-short-link { justify-content: space-between; gap: 12px; border-color: #d4e4d6; color: var(--indigo-dark); background: #f0f6f0; font-weight: 700; }
-.hero-short-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hero-short-link span i { margin-right: 5px; }
-.hero-short-link > i { flex: 0 0 auto; }
-.hero-visual-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 19px; color: #829087; font-size: 10px; }
-.hero-visual-foot span:first-child { color: #39704b; font-weight: 700; }
-.hero-visual-foot i { margin-right: 5px; }
 .shortener-section { padding-top: 18px; padding-bottom: clamp(70px, 8vw, 104px); scroll-margin-top: 28px; }
 .shortener-section-intro { max-width: 650px; margin: 0 auto 25px; text-align: center; }
 .shortener-section-intro .section-kicker { justify-content: center; }
@@ -457,20 +442,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .faq-contact-card p { margin: 0; color: var(--text-soft); font-size: 11px; line-height: 1.7; }
 .faq-contact-card .button { flex: 0 0 auto; min-height: 42px; padding: 0 14px; }
 @media (max-width: 900px) {
-  .hero-home { grid-template-columns: minmax(0, 1fr) minmax(270px, .8fr); gap: 28px; }
-  .hero-link-card { padding: 20px; }
   .hero-home h1 { letter-spacing: -2.5px; }
 }
 @media (max-width: 680px) {
   .top-nav { min-height: 68px; gap: 12px; }
   .nav-links { display: none; }
-  .hero-home { grid-template-columns: 1fr; gap: 22px; padding-top: 44px; padding-bottom: 34px; text-align: center; }
+  .hero-home { padding-top: 44px; padding-bottom: 34px; }
   .hero-home .section-kicker, .hero-home .hero-proof, .hero-actions { justify-content: center; }
   .hero-home h1 { margin: 17px auto 14px; font-size: clamp(39px, 10vw, 52px); letter-spacing: -2px; }
   .hero-home .hero-description { margin-inline: auto; font-size: 14px; }
   .hero-home .hero-proof { font-size: 10px; }
-  .hero-visual { min-height: 0; padding: 12px 6px 20px; }
-  .hero-link-card { width: min(100%, 420px); transform: none; }
   .shortener-section { padding-top: 8px; }
   .shortener-section .shortener-card { padding: 21px; }
   .faq-page { padding-top: 30px; padding-bottom: 60px; }
