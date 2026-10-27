@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ metadata.title }}</title>
+  <meta name="description" content="{{ metadata.description }}">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://url.amwafy.xyz{{ path }}">
+  <link rel="icon" type="image/webp" href="/icon.webp">
+  <meta name="theme-color" content="#f8faff">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WafyURL">
+  <meta property="og:title" content="{{ metadata.title }}">
+  <meta property="og:description" content="{{ metadata.description }}">
+  <meta property="og:url" content="https://url.amwafy.xyz{{ path }}">
+  <meta property="og:image" content="https://url.amwafy.xyz/og-image.webp">
+  <script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "WebPage", "name": metadata.title, "description": metadata.description, "url": "https://url.amwafy.xyz" ~ path, "isPartOf": {"@type": "WebSite", "name": "WafyURL", "url": "https://url.amwafy.xyz/"}}|tojson }}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="site-shell">
+    <nav class="top-nav" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="WafyURL home"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a>
+      <div class="nav-links"><a href="/#features">Features</a><a href="/bulk-url-shortener">Bulk tools</a><a href="/link-analytics">Analytics</a><a href="/faq">FAQ</a></div>
+      <a class="nav-cta" href="/shorten">Shorten a link <i class="fa-solid fa-arrow-right"></i></a>
+    </nav>
+    <main class="seo-page">
+      <div class="section-kicker"><span class="kicker-dot"></span> WAFYURL RESOURCES</div>
+      <h1>{{ content.heading }}</h1>
+      <p class="lead">{{ content.lead }}</p>
+      <div class="seo-content">
+        {% for heading, paragraph in content.sections %}
+          <section><h2>{{ heading }}</h2><p>{{ paragraph }}</p></section>
+        {% endfor %}
+      </div>
+      {% if path == '/bulk-url-shortener' %}<a class="button button-primary seo-cta" href="/?tool=bulk#shortener"><i class="fa-solid fa-layer-group"></i> Open bulk shortener</a>{% elif path == '/custom-url-shortener' %}<a class="button button-primary seo-cta" href="/?customize=1#shortener"><i class="fa-solid fa-sliders"></i> Customize a short link</a>{% else %}<a class="button button-primary seo-cta" href="/shorten"><i class="fa-solid fa-link"></i> Create a short link</a>{% endif %}
+    </main>
+    <footer class="site-footer"><div class="footer-main"><a class="brand" href="/"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a><p>Make every link easier to share.</p><div class="footer-links"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/faq">FAQ</a><a href="https://github.com/afeemuhammodwafy1" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 WafyURL</span><span>Built by Afee Muhammod Wafy</span></div></footer>
+  </div>
+</body>
+</html>

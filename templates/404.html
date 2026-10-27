@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ error_title|default('Link not found') }} | WafyURL</title>
+  <meta name="robots" content="noindex,follow">
+  <link rel="icon" type="image/webp" href="/icon.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body><div class="site-shell"><nav class="top-nav"><a class="brand" href="/"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a><a class="nav-cta" href="/">Go to homepage <i class="fa-solid fa-arrow-right"></i></a></nav><main class="seo-page"><div class="section-kicker"><span class="kicker-dot"></span> WAFYURL</div><h1>{{ error_title|default('Link not found') }}</h1><p class="lead">{{ error_message|default("The link you opened may not exist, may have expired, or may no longer be available.") }}</p><a class="button button-primary seo-cta" href="/"><i class="fa-solid fa-house"></i> Back to homepage</a></main><footer class="site-footer"><div class="footer-bottom"><span>© 2026 WafyURL</span><span>Built by Afee Muhammod Wafy</span></div></footer></div></body>
+</html>

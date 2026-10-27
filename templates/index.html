@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if stats %}Link analytics for {{ stats.short_code }} | WafyURL{% else %}WafyURL — Short links, made smarter{% endif %}</title>
+  <meta name="description" content="Shorten long URLs, create custom aliases, protect links with passwords, generate QR codes and understand click activity with WafyURL.">
+  <meta name="author" content="Afee Muhammod Wafy">
+  <meta name="robots" content="{% if stats %}noindex,follow{% else %}index,follow{% endif %}">
+  <link rel="canonical" href="https://url.amwafy.xyz/{% if stats %}{{ stats.short_code }}+{% endif %}">
+  <link rel="icon" type="image/webp" href="/icon.webp">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WafyURL">
+  <meta property="og:title" content="WafyURL — Short links, made smarter">
+  <meta property="og:description" content="Create clean short links, add protection and measure link activity.">
+  <meta property="og:url" content="https://url.amwafy.xyz/">
+  <meta property="og:image" content="https://url.amwafy.xyz/og-image.webp">
+  <meta name="theme-color" content="#f8faff">
+  {% if not stats %}<script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "WebApplication", "name": "WafyURL", "url": "https://url.amwafy.xyz/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "All", "description": "Create short URLs, customize aliases, protect links, generate QR codes and review link activity with WafyURL.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}|tojson }}</script>{% endif %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  {% if stats %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>{% endif %}
+</head>
+<body>
+  <div class="site-shell">
+    <nav class="top-nav" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="WafyURL home"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a>
+      <div class="nav-links">
+        <a href="/#features">Features</a>
+        <a href="/shorten#bulkArea">Bulk tools</a>
+        <a href="/link-analytics">Analytics</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <a class="nav-cta" href="{% if stats %}/{% else %}/shorten{% endif %}">Shorten a link <i class="fa-solid fa-arrow-right"></i></a>
+    </nav>
+
+    <main>
+      {% if stats %}
+      <section class="analytics-page page-width" data-stats-code="{{ stats.short_code }}">
+        <a class="back-link" href="/"><i class="fa-solid fa-arrow-left"></i> Back to WafyURL</a>
+        <div class="section-kicker"><span class="kicker-dot"></span> LINK OVERVIEW</div>
+        <div class="analytics-heading">
+          <div><h1>Link analytics</h1><p class="section-copy">Understand the activity recorded for this short link.</p></div>
+          <span class="status-pill status-active"><span></span> Active link</span>
+        </div>
+        <div class="analytics-link-card">
+          <div class="analytics-link-icon"><i class="fa-solid fa-link"></i></div>
+          <div class="analytics-link-details"><span class="eyebrow">SHORT LINK</span><a href="https://url.amwafy.xyz/{{ stats.short_code }}" target="_blank" rel="noopener noreferrer">url.amwafy.xyz/{{ stats.short_code }}</a><p class="destination-text">Destination: {{ stats.original_url }}</p></div>
+          <button class="icon-button" type="button" onclick="copyText('https://url.amwafy.xyz/{{ stats.short_code }}')" aria-label="Copy short link"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="metrics-grid">
+          <article class="metric-card"><span class="metric-label">Total clicks</span><div class="metric-value">{{ stats.clicks }}</div><span class="metric-note">All recorded visits</span><span class="metric-icon"><i class="fa-solid fa-arrow-pointer"></i></span></article>
+          <article class="metric-card"><span class="metric-label">Last 30 days</span><div class="metric-value" id="recentClicks">—</div><span class="metric-note">Recent recorded visits</span><span class="metric-icon"><i class="fa-solid fa-chart-line"></i></span></article>
+          <article class="metric-card"><span class="metric-label">Created</span><div class="metric-value metric-date">{{ stats.created_at.strftime('%b %d, %Y') if stats.created_at else '—' }}</div><span class="metric-note">Link creation date</span><span class="metric-icon"><i class="fa-regular fa-calendar"></i></span></article>
+          <article class="metric-card"><span class="metric-label">Expiration</span><div class="metric-value metric-date">{{ stats.expires_at.strftime('%b %d, %Y') if stats.expires_at else 'Never' }}</div><span class="metric-note">Scheduled link expiry</span><span class="metric-icon"><i class="fa-regular fa-clock"></i></span></article>
+        </div>
+        <div class="analytics-grid">
+          <section class="analytics-panel analytics-chart-panel"><div class="panel-heading"><div><h2>Click activity</h2><p>Daily clicks over the last 30 days</p></div><span class="panel-period">30 days</span></div><div class="chart-wrap"><canvas id="clickChart" aria-label="Daily click activity chart" role="img"></canvas><p id="chartEmpty" class="chart-empty hidden">No click activity recorded in this period.</p></div></section>
+          <section class="analytics-panel"><div class="panel-heading"><div><h2>Devices</h2><p>Where clicks were recorded</p></div></div><div id="deviceBreakdown" class="breakdown-list"><p class="loading-note">Loading device data…</p></div></section>
+          <section class="analytics-panel"><div class="panel-heading"><div><h2>Browsers</h2><p>Browser families in click logs</p></div></div><div id="browserBreakdown" class="breakdown-list"><p class="loading-note">Loading browser data…</p></div></section>
+          <section class="analytics-panel"><div class="panel-heading"><div><h2>Top referrers</h2><p>Sources that referred visitors</p></div></div><div id="referrerBreakdown" class="breakdown-list"><p class="loading-note">Loading referrer data…</p></div></section>
+        </div>
+        <div class="analytics-notice"><i class="fa-solid fa-circle-info"></i><span>Analytics reflect recorded requests, not guaranteed unique people. Automated scanners and repeat visits may affect click counts. Visitor geolocation is disabled by default.</span></div>
+        <a href="/" class="button button-primary"><i class="fa-solid fa-plus"></i> Create another link</a>
+      </section>
+      {% else %}
+      {% if shortener_page %}
+      <section class="hero page-width shortener-page-hero" id="shortener">
+        <div class="shortener-intro"><div class="section-kicker" style="justify-content:center"><span class="kicker-dot"></span> YOUR LINKS, UNDER CONTROL</div><h1>Make every link <span>shorter.</span></h1><p>Create clean, memorable links, customize access and share with confidence.</p></div>
+        <section class="shortener-card" aria-labelledby="shortener-title">
+          <div class="card-heading"><div><span class="eyebrow">URL TOOLKIT</span><h2 id="shortener-title">Shorten a URL</h2></div><span class="card-heading-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span></div>
+          {% if error %}<div class="inline-alert" role="alert"><i class="fa-solid fa-circle-exclamation"></i>{{ error }}</div>{% endif %}
+          <div class="input-section">
+            <label class="field-label" for="longUrl">Destination URL</label>
+            <div class="url-input-wrap"><i class="fa-solid fa-link input-icon"></i><input type="url" id="longUrl" placeholder="https://example.com/your/long/url" autocomplete="url" spellcheck="false" aria-label="URL to shorten" required><button id="pasteBtn" class="paste-button" type="button" title="Paste from clipboard" aria-label="Paste URL"><i class="fa-regular fa-clipboard"></i><span>Paste</span></button></div>
+            <div class="field-help">Paste any valid public HTTP or HTTPS URL.</div>
+            <button class="advanced-toggle" id="advancedToggle" type="button" aria-expanded="false" aria-controls="advancedOptions"><span><i class="fa-solid fa-sliders"></i> Customize your link</span><i class="fa-solid fa-chevron-down advanced-chevron"></i></button>
+            <div class="input-options advanced-options hidden" id="advancedOptions">
+              <div class="option-group"><label class="field-label" for="customCode">Custom alias <span>Optional</span></label><div class="alias-input-wrap"><span>url.amwafy.xyz/</span><input type="text" id="customCode" placeholder="your-link" maxlength="20" autocomplete="off" aria-label="Custom short code"></div><div class="field-help">3–20 letters, numbers, underscores or hyphens.</div></div>
+              <div class="option-row"><div class="option-group"><label class="field-label" for="password">Link password <span>Optional</span></label><div class="password-input-wrap"><input type="password" id="password" placeholder="Add a password" autocomplete="new-password" aria-label="Password for link protection"><button type="button" id="togglePassword" class="field-icon-button" title="Show or hide password" aria-label="Show or hide password"><i class="fa-regular fa-eye"></i></button></div></div><div class="option-group"><label class="field-label" for="expiresIn">Expiration</label><select id="expiresIn" aria-label="Expiration time"><option value="never">Never expires</option><option value="1h">In 1 hour</option><option value="24h">In 24 hours</option><option value="7d">In 7 days</option><option value="30d">In 30 days</option><option value="custom">Choose date &amp; time</option></select></div></div>
+              <div class="option-group custom-expiry-group hidden" id="customExpiryGroup"><label class="field-label" for="expiresAt">Expiration date &amp; time</label><input class="datetime-input" type="datetime-local" id="expiresAt" aria-label="Custom expiration date and time"><div class="field-help">Your browser’s local time will be converted before saving.</div></div>
+            </div>
+            <button id="shortenBtn" class="button button-primary button-shorten" type="button"><span><i class="fa-solid fa-wand-magic-sparkles"></i> Shorten URL</span><i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+          <div class="bulk-section"><button id="bulkToggleBtn" class="bulk-toggle" type="button" aria-expanded="false" aria-controls="bulkArea"><span><i class="fa-solid fa-layer-group"></i> Need to shorten multiple links?</span><span class="bulk-toggle-label">Bulk tools <i class="fa-solid fa-arrow-up-right-from-square"></i></span></button><div id="bulkArea" class="bulk-area hidden"><label class="field-label" for="bulkUrls">Paste up to 50 URLs</label><textarea id="bulkUrls" placeholder="https://example.com/page-one&#10;https://example.com/page-two&#10;https://example.com/page-three" rows="5" spellcheck="false" aria-label="Bulk URLs to shorten"></textarea><div class="bulk-footer"><span class="field-help">One URL per line or comma separated.</span><button id="bulkShortenBtn" class="button button-primary button-bulk" type="button">Shorten all</button></div><div id="bulkResults" class="bulk-results"></div></div></div>
+          <div id="resultSection" class="result-section hidden" aria-live="polite"><div class="result-success"><span class="success-icon"><i class="fa-solid fa-check"></i></span><div><h3>Your short link is ready</h3><p>Copy it or choose what to do next.</p></div></div><div class="url-output-wrapper"><div class="url-output"><input type="text" id="shortenedUrl" readonly aria-label="Shortened URL"><button id="copyBtn" class="button button-primary button-copy" type="button"><i class="fa-regular fa-copy"></i><span>Copy</span></button></div></div><div class="result-actions"><button id="shareBtn" class="button button-secondary" type="button"><i class="fa-solid fa-share-nodes"></i> Share</button><button id="qrToggleBtn" class="button button-secondary" type="button"><i class="fa-solid fa-qrcode"></i> QR code</button><button id="previewBtn" class="button button-secondary" type="button"><i class="fa-regular fa-eye"></i> Preview</button><button id="statsBtn" class="button button-secondary" type="button" style="display:none"><i class="fa-solid fa-chart-simple"></i> Overview</button></div><div id="qrSection" class="qr-section hidden"><div class="qr-wrapper"><div id="qrcode"></div><button id="downloadQrBtn" class="button button-secondary" type="button"><i class="fa-solid fa-download"></i> Download QR</button></div></div></div>
+        </section>
+      </section>
+      {% else %}
+      <section class="hero hero-home page-width">
+        <div class="hero-copy">
+          <div class="section-kicker"><span class="kicker-dot"></span> YOUR LINKS, UNDER CONTROL</div>
+          <h1>Long URLs.<br><span>Shorter stories.</span></h1>
+          <p class="hero-description">Create clean, memorable links in seconds. Customize the ending, add protection and share with confidence.</p>
+          <div class="hero-proof"><span><i class="fa-solid fa-check"></i> Custom aliases</span><span><i class="fa-solid fa-check"></i> Password protection</span><span><i class="fa-solid fa-check"></i> QR codes</span></div>
+        </div>
+
+        <div class="hero-actions"><a href="/shorten" class="button button-primary"><i class="fa-solid fa-link"></i> Open URL shortener</a><a href="/bulk-url-shortener" class="button button-secondary"><i class="fa-solid fa-layer-group"></i> Bulk tools</a></div>
+      </section>
+      {% endif %}
+
+      {% if not shortener_page %}
+      <section class="trust-strip page-width"><div><strong>{{ total_links|default(0) }}</strong><span>links created on WafyURL</span></div><span class="trust-divider"></span><div><i class="fa-solid fa-shield-halved"></i><span>Protection when you need it</span></div><span class="trust-divider"></span><div><i class="fa-solid fa-qrcode"></i><span>QR codes included</span></div></section>
+
+      <section class="features-section page-width" id="features"><div class="section-intro"><div class="section-kicker"><span class="kicker-dot"></span> EVERYTHING YOU NEED</div><h2>Small links. <span>Serious utility.</span></h2><p>Practical link tools designed to make sharing easier and link management clearer.</p></div><div class="feature-grid">
+        <article class="feature-card"><span class="feature-icon icon-indigo"><i class="fa-solid fa-bolt"></i></span><h3>Instant shortening</h3><p>Turn long, hard-to-share URLs into clean short links in a few moments.</p><a href="/url-shortener">Explore URL shortening <i class="fa-solid fa-arrow-right"></i></a></article>
+        <article class="feature-card"><span class="feature-icon icon-violet"><i class="fa-solid fa-sliders"></i></span><h3>Custom aliases</h3><p>Use a memorable slug that makes a link easier to recognize and share.</p><a href="/custom-url-shortener">Explore custom links <i class="fa-solid fa-arrow-right"></i></a></article>
+        <article class="feature-card"><span class="feature-icon icon-blue"><i class="fa-solid fa-chart-line"></i></span><h3>Click insights</h3><p>Review recorded click totals and available link activity information.</p><a href="/link-analytics">Explore analytics <i class="fa-solid fa-arrow-right"></i></a></article>
+        <article class="feature-card"><span class="feature-icon icon-green"><i class="fa-solid fa-shield-halved"></i></span><h3>Protected links</h3><p>Add a password or set an expiry window for links that should not stay open forever.</p><a href="/password-protected-links">Explore link protection <i class="fa-solid fa-arrow-right"></i></a></article>
+        <article class="feature-card"><span class="feature-icon icon-amber"><i class="fa-solid fa-qrcode"></i></span><h3>Downloadable QR codes</h3><p>Generate a QR code for a short link and download it for print or digital use.</p><a href="/qr-code-generator">Explore QR codes <i class="fa-solid fa-arrow-right"></i></a></article>
+        <article class="feature-card"><span class="feature-icon icon-rose"><i class="fa-solid fa-layer-group"></i></span><h3>Bulk workflows</h3><p>Process multiple URLs in one workflow, with an outcome for each submitted URL.</p><a href="/bulk-url-shortener">Explore bulk shortening <i class="fa-solid fa-arrow-right"></i></a></article>
+      </div></section>
+
+      <section class="how-section page-width"><div class="section-intro"><div class="section-kicker"><span class="kicker-dot"></span> SIMPLE BY DESIGN</div><h2>From long URL to <span>ready to share.</span></h2></div><div class="steps-grid"><article class="step-card"><span class="step-number">01</span><h3>Paste your URL</h3><p>Start with the destination you want to share.</p></article><article class="step-card"><span class="step-number">02</span><h3>Make it yours</h3><p>Choose a custom alias, password or expiry if needed.</p></article><article class="step-card"><span class="step-number">03</span><h3>Share anywhere</h3><p>Copy your link or download its QR code.</p></article></div></section>
+
+      <section class="faq-section page-width" id="faq"><div class="section-intro"><div class="section-kicker"><span class="kicker-dot"></span> GOOD TO KNOW</div><h2>Frequently asked <span>questions.</span></h2></div><div class="faq-list"><details class="faq-item"><summary>Is WafyURL free to use?<i class="fa-solid fa-plus"></i></summary><p>WafyURL currently offers its available URL-shortening tools without a paid checkout. Usage limits and availability may change as the service evolves.</p></details><details class="faq-item"><summary>Can I customize a short link?<i class="fa-solid fa-plus"></i></summary><p>Yes. Use the optional custom alias field to request a memorable ending, provided that alias is valid and available.</p></details><details class="faq-item"><summary>Can I protect a link with a password?<i class="fa-solid fa-plus"></i></summary><p>You can set an optional password when creating a link. The password gate should be used as an access barrier, not as a substitute for a secure document-sharing system.</p></details><details class="faq-item"><summary>Can links expire automatically?<i class="fa-solid fa-plus"></i></summary><p>Yes. Available expiry options include one hour, one day, seven days and thirty days. You can also choose a link with no scheduled expiry.</p></details><details class="faq-item"><summary>Can I make QR codes for my short links?<i class="fa-solid fa-plus"></i></summary><p>Yes. Generate a QR code for the short URL and download it as an image for use in print or digital materials.</p></details></div></section>
+      {% endif %}
+      {% endif %}
+    </main>
+
+    <footer class="site-footer"><div class="footer-main"><a class="brand" href="/"><span class="brand-mark"><i class="fa-solid fa-link"></i></span><span>Wafy<span class="brand-accent">URL</span></span></a><p>Make every link easier to share.</p><div class="footer-links"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/faq">FAQ</a><a href="https://github.com/afeemuhammodwafy1" target="_blank" rel="noopener noreferrer">GitHub <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div></div><div class="footer-bottom"><span>© 2026 WafyURL</span><span>Built by Afee Muhammod Wafy</span></div></footer>
+  </div>
+
+  <div id="previewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="previewTitle"><div class="modal-content"><button class="modal-close" onclick="closePreview()" type="button" aria-label="Close preview"><i class="fa-solid fa-xmark"></i></button><div id="previewContent"><div id="previewImageWrapper"><img id="previewImage" src="" alt="Destination website preview"></div><span class="eyebrow">DESTINATION PREVIEW</span><h3 id="previewTitle">Loading preview...</h3><p id="previewDesc"></p></div></div></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"><i class="fa-solid fa-circle-check" id="toastIcon"></i><span id="toastMessage">Copied!</span></div>
+  <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+  {% if stats %}<script src="{{ url_for('static', filename='js/analytics.js') }}" defer></script>{% endif %}
+</body>
+</html>
