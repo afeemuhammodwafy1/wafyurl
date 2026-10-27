@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/wafyurl-banner.webp" alt="WafyURL — Shorten Smarter. Share Faster. Track Everything." width="100%">
+  <img src="docs/images/wafyurl.webp" alt="WafyURL — Shorten Smarter. Share Faster. Track Everything." width="100%">
 </p>
 
 # WafyURL
